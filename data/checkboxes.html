@@ -1,0 +1,20 @@
+<html>
+  <head>
+    <title>checkboxes!</title>
+  </head>
+  <body>
+    <input type="checkbox" /><label>checkbox with next sibling label</label>
+    <br/>
+    <label onclick="document.getElementById('checkbox-wrapped-by-label').click()">
+      <span>
+        <input type="checkbox" />
+      </span>
+      <span>checkbox wrapped with a label</span>
+    </label>
+    <br/>
+    <input type="checkbox" /><b></b><div><label>checkbox with next nested sibling label</label></div>
+    <br/>
+    <input type="checkbox" /><label>checkbox with '" in the name</label>
+    <br/>
+  </body>
+</html>

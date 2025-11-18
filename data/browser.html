@@ -1,0 +1,17 @@
+<html>
+<head>
+    <title>browser!</title>
+</head>
+<body>
+    <p id="counter">This page has been loaded **1** times.</p>
+
+    <script>
+        // Check if the 'refreshCount' item exists in sessionStorage
+        let count = sessionStorage.getItem('refreshCount') || 0
+        count = parseInt(count)
+        count++
+        sessionStorage.setItem('refreshCount', count)
+        document.getElementById('counter').innerHTML = 'This page has been loaded **' + count + '** times.'
+    </script>
+</body>
+</html>

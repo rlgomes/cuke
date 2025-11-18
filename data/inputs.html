@@ -1,0 +1,36 @@
+<html>
+  <head>
+    <title>inputs!</title>
+  </head>
+  <body>
+    <label>last touched</label><input id="last-touched"/>
+    <br/>
+    
+    <input onkeypress="touched('input with placeholder')" placeholder="input with placeholder"></input>
+    <br/>
+    <label>input with previous label</label>
+    <input onkeypress="touched('input with previous label')"></input>
+    <br/>
+    <input onkeypress="touched('input that becomes enabled')" id="disabled-input" disabled placeholder="input that becomes enabled"></input>
+    <br/>
+
+    <div id="tail"></div>
+    <script>
+      function touched(name) {
+        document.querySelector("#last-touched").value = name;
+      }
+
+      setTimeout(function () {
+        var tail = document.querySelector("#tail");
+        tail.insertAdjacentHTML(
+          "afterend",
+          "<input placeholder='input that appears 2 seconds later'>"
+        );
+
+        // enable the disabled input
+        var disabledInput = document.querySelector("#disabled-input");
+        disabledInput.removeAttribute("disabled")
+      }, 2000);
+    </script>
+  </body>
+</html>
