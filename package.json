@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "",
   "scripts": {
-    "build": "tsc --build && npm run copy-js && chmod +x dist/index.js",
+    "build": "tsc --build && npm run copy-js && chmod +x dist/cli.js",
     "clean": "tsc --build --clean",
     "lint": "eslint --ext .js,.ts src",
     "release": "npm run build && npm pack --pack-destination=./dist",
