@@ -2,5 +2,39 @@
   <head>
     <title>tables!</title>
   </head>
-  <body></body>
+  <body>
+    <table>
+      <tr>
+        <td>Cell 1</td>
+        <td>Cell 2</td>
+        <td>Cell 3</td>
+      </tr>
+      <tr>
+        <td>Cell 4</td>
+        <td>Cell 5</td>
+        <td>Cell 6</td>
+      </tr>
+    </table>
+
+    <table>
+      <tr>
+        <td onclick="document.getElementById('last-clicked').value = 'clickable cell'">clickable cell</td>
+        <td>non-clickable cell</td>
+      </tr>
+    </table>
+
+    <label>last clicked</label><input id="last-clicked" type="text" />
+
+    <div id="table-tail"></div>
+
+    <script>
+      setTimeout(function () {
+        let tail = document.querySelector("#table-tail");
+        tail.insertAdjacentHTML(
+          "afterend",
+          "<table><tr><td>cell that appears 2 seconds later</td></tr></table>"
+        );
+      }, 2000);
+    </script>
+  </body>
 </html>

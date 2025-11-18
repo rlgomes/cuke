@@ -17,3 +17,11 @@ Feature: Browser management
     Given I open a browser at "file:///${PWD}/data/browser.html"
      Then I should see the browser URL is equal to "file://${PWD}/data/browser.html"
       And I should see the browser URL ends with "browser.html"
+
+  Scenario: User can wait for the browser URL to become equal to a value
+    Given I open a browser at "file:///${PWD}/data/browser_url_change.html"
+     Then I wait to see the browser URL is equal to "file://${PWD}/data/browser.html"
+
+  Scenario: User can wait for the browser URL to end with a fragment
+    Given I open a browser at "file:///${PWD}/data/browser_url_change.html"
+     Then I wait to see the browser URL ends with "browser.html"

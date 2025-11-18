@@ -79,12 +79,15 @@ export function defineVisibilitySteps (
     })
 
   Step(`I wait up to "{seconds}" seconds to see the ${elementName} "{name}"`,
-    async function (this: CukeWorld, name: string) {
+    async function (this: CukeWorld, seconds: string, name: string) {
       await this.waitFor(async () => {
         const element = await findFunction.bind(this)(name)
         if (element == null) {
           throw new Error(`unable to find ${elementName} "${name}"`)
         }
+      },
+      {
+        timeout: parseInt(seconds) * 1000
       })
     })
 }

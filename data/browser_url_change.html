@@ -1,0 +1,15 @@
+<html>
+<head>
+    <title>Browser URL Change Test</title>
+</head>
+<body>
+    <p id="status">Initial page loaded</p>
+    <a id="redirect-link" href="browser.html">Click to redirect</a>
+
+    <script>
+        setTimeout(function() {
+            window.location.href = 'browser.html'
+        }, 2000);
+    </script>
+</body>
+</html>

@@ -4,5 +4,26 @@
   </head>
   <body>
     <h1>some text in a header</h1>
+    <p>This is some visible text</p>
+    <p id="text-to-hover" onmouseover="document.getElementById('hover-status').innerText = 'hovered'">text to hover over</p>
+    <p id="hover-status">not hovered</p>
+
+    <div id="text-tail"></div>
+
+    <script>
+      setTimeout(function () {
+        let tail = document.querySelector("#text-tail");
+        tail.insertAdjacentHTML(
+          "afterend",
+          "<p>text that appears 2 seconds later</p>"
+        );
+
+        // Remove some text after 2 seconds
+        let textToRemove = document.querySelector("p");
+        if (textToRemove && textToRemove.id !== "text-to-hover" && textToRemove.id !== "hover-status") {
+          textToRemove.remove();
+        }
+      }, 2000);
+    </script>
   </body>
 </html>

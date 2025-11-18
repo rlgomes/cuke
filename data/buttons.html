@@ -9,6 +9,7 @@
     <button onclick="touched('button with inner text label')">button with inner text label</button>
     <button onclick="touched('button with inner node label')"><span>button with inner node label<span></button>
     <button onclick="touched('button that becomes enabled')" id="disabled-button" disabled>button that becomes enabled</button>
+    <button id="permanently-disabled-button" disabled>button that stays disabled</button>
 
     <div id="tail"></div>
 
@@ -21,7 +22,7 @@
         var tail = document.querySelector("#tail");
         tail.insertAdjacentHTML(
           "afterend",
-          "<button onclick=\"touched('button that appears 2 seconds later')'\" >button that appears 2 seconds later</button>"
+          "<button onclick=\"touched('button that appears 2 seconds later')\" >button that appears 2 seconds later</button>"
         );
 
         // enable the disabled button

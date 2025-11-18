@@ -102,9 +102,9 @@ export class CukeWorld extends World {
       }
     }
 
-    // if (element !== undefined) {
-    //  this.debug('fuzzy returning', await element.getAttribute('outerHTML'))
-    // }
+    if (element !== undefined) {
+      this.debug('fuzzy returning', await element.getAttribute('outerHTML'))
+    }
     return element
   }
 
@@ -208,7 +208,7 @@ export class CukeWorld extends World {
       ['input[type=checkbox]', '*[role=checkbox]', '*[role=switch]'],
       ['aria-label', 'title'],
       0,
-      'l2r'
+      'r2l'
     )
 
     if (result !== undefined) {
@@ -220,7 +220,7 @@ export class CukeWorld extends World {
       ['input[type=checkbox]', '*[role=checkbox]', '*[role=switch]'],
       ['aria-label', 'title'],
       0,
-      'r2l'
+      'l2r'
     )
   }
 

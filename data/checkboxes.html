@@ -16,5 +16,34 @@
     <br/>
     <input type="checkbox" /><label>checkbox with '" in the name</label>
     <br/>
+    <input type="checkbox" id="checkbox-that-becomes-checked" /><label>checkbox that becomes checked</label>
+    <br/>
+    <input type="checkbox" id="checkbox-that-becomes-unchecked" checked /><label>checkbox that becomes unchecked</label>
+    <br/>
+    <input type="checkbox" id="checkbox-to-uncheck" checked /><label>checkbox to uncheck</label>
+    <br/>
+    <div id="checkbox-tail"></div>
+
+    <script>
+      setTimeout(function () {
+        let tail = document.querySelector("#checkbox-tail");
+        tail.insertAdjacentHTML(
+          "afterend",
+          "<input type=\"checkbox\" /><label>checkbox that appears 2 seconds later</label><br/>"
+        );
+
+        // Check the checkbox that becomes checked
+        var checkboxToCheck = document.querySelector("#checkbox-that-becomes-checked");
+        if (checkboxToCheck) {
+          checkboxToCheck.checked = true;
+        }
+
+        // Uncheck the checkbox that becomes unchecked
+        var checkboxToUncheck = document.querySelector("#checkbox-that-becomes-unchecked");
+        if (checkboxToUncheck) {
+          checkboxToUncheck.checked = false;
+        }
+      }, 2000);
+    </script>
   </body>
 </html>

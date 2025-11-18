@@ -1,0 +1,41 @@
+<html>
+  <head>
+    <title>switches!</title>
+  </head>
+  <body>
+    <input type="checkbox" /><label>switch with next sibling label</label>
+    <br/>
+    <span><input type="checkbox" id="switch-wrapped-by-label" />switch wrapped with a label</span>
+    <br/>
+    <input type="checkbox" checked /><label>switch that is on</label>
+    <br/>
+    <input type="checkbox" id="switch-that-turns-on" /><label>switch that turns on</label>
+    <br/>
+    <input type="checkbox" id="switch-that-turns-off" checked /><label>switch that turns off</label>
+    <br/>
+    <div id="switch-tail"></div>
+
+    <script>
+      setTimeout(function () {
+        let tail = document.querySelector("#switch-tail");
+        tail.insertAdjacentHTML(
+          "afterend",
+          "<input type=\"checkbox\" /><label>switch that appears 2 seconds later</label><br/>"
+        );
+
+        // Turn on the switch that turns on
+        let switchToTurnOn = document.querySelector("#switch-that-turns-on");
+        if (switchToTurnOn) {
+          switchToTurnOn.checked = true;
+        }
+
+        // Turn off the switch that turns off
+        let switchToTurnOff = document.querySelector("#switch-that-turns-off");
+        if (switchToTurnOff) {
+          switchToTurnOff.checked = false;
+        }
+      }, 2000);
+    </script>
+  </body>
+</html>
+

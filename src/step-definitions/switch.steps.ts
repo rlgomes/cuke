@@ -1,85 +1,38 @@
-import { type CukeWorld, Step } from '../index'
+import type { CukeWorld, WebElement } from './world'
+import {
+  defineActionSteps,
+  defineVisibilitySteps,
+  defineInStateSteps
+} from './utils.steps'
 
-Step('I turn on the switch "{arg}"',
-  async function (this: CukeWorld, name: string) {
-    const switch_ = await this.findSwitch(name)
+async function findSwitch (this: CukeWorld, name: string): Promise<WebElement> {
+  return await this.findSwitch(name)
+}
 
-    if (switch_ === undefined) {
-      throw new Error(`unable to find switch ${name}`)
-    }
+async function turnOnSwitch (this: CukeWorld, element: WebElement): Promise<void> {
+  if (await this.isChecked(element)) {
+    throw new Error('switch is already on')
+  }
+  await element.click()
+}
 
-    const checked = await switch_.getAttribute('checked')
+async function turnOffSwitch (this: CukeWorld, element: WebElement): Promise<void> {
+  if (await this.isUnchecked(element)) {
+    throw new Error('switch is already off')
+  }
+  await element.click()
+}
 
-    if (checked === 'true') {
-      throw new Error(`switch "${name}" is already on`)
-    }
+async function isOn (this: CukeWorld, element: WebElement): Promise<boolean> {
+  return await this.isChecked(element)
+}
 
-    await switch_.click()
-  })
+async function isOff (this: CukeWorld, element: WebElement): Promise<boolean> {
+  return await this.isUnchecked(element)
+}
 
-Step('I wait to turn on the switch "{arg}"',
-  async function (this: CukeWorld, name: string) {
-    await this.waitFor(async () => {
-      const switch_ = await this.findSwitch(name)
-
-      if (switch_ === undefined) {
-        throw new Error(`unable to find switch ${name}`)
-      }
-
-      const checked = await switch_.getAttribute('checked')
-
-      if (checked === 'true') {
-        throw new Error(`switch "${name}" is already on`)
-      }
-      await switch_.click()
-    })
-  })
-
-Step('I turn off the switch "{arg}"',
-  async function (this: CukeWorld, name: string) {
-    const switch_ = await this.findSwitch(name)
-
-    if (switch_ === undefined) {
-      throw new Error(`unable to find switch_ ${name}`)
-    }
-
-    const checked = await switch_.getAttribute('checked')
-    if (checked !== 'true') {
-      throw new Error(`switch_ "${name}" is already uchecked`)
-    }
-    await switch_.click()
-  })
-
-Step('I should see the switch "{arg}"',
-  async function (this: CukeWorld, name: string) {
-    const switch_ = await this.findSwitch(name)
-    if (switch_ === undefined) {
-      throw new Error(`unable to find switch_ "${name}"`)
-    }
-  })
-
-Step('I should see the switch "{arg}" is on',
-  async function (this: CukeWorld, name: string) {
-    const switch_ = await this.findSwitch(name)
-    if (switch_ === undefined) {
-      throw new Error(`unable to find switch_ ${name}`)
-    }
-    const checked = await switch_.getAttribute('checked')
-    if (checked !== 'true') {
-      throw new Error(`switch_ "${name}" is not checked`)
-    }
-  })
-
-Step('I should see the switch "{arg}" is off',
-  async function (this: CukeWorld, name: string) {
-    const switch_ = await this.findSwitch(name)
-    if (switch_ === undefined) {
-      throw new Error(`unable to find switch_ ${name}`)
-    }
-
-    const checked = await switch_.getAttribute('checked')
-
-    if (checked === 'true') {
-      throw new Error(`switch_ "${name}" is checked`)
-    }
-  })
+defineActionSteps('turn on', turnOnSwitch, 'switch', findSwitch)
+defineActionSteps('turn off', turnOffSwitch, 'switch', findSwitch)
+defineVisibilitySteps('switch', findSwitch)
+defineInStateSteps('switch', findSwitch, 'on', isOn)
+defineInStateSteps('switch', findSwitch, 'off', isOff)

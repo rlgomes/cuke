@@ -23,5 +23,17 @@
       <option value="green">Green</option>
       <option value="blue">Blue</option>
     </select>
+
+    <div id="dropdown-tail"></div>
+
+    <script>
+      setTimeout(function () {
+        let tail = document.querySelector("#dropdown-tail");
+        tail.insertAdjacentHTML(
+          "afterend",
+          "<label>dropdown that appears 2 seconds later</label><select name=\"delayed-dropdown\"><option value=\"option1\">Option 1</option><option value=\"option2\">Option 2</option></select>"
+        );
+      }, 2000);
+    </script>
   </body>
 </html>
