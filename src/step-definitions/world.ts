@@ -122,6 +122,10 @@ export class CukeWorld extends World {
     this.buttonExpressions.push(expression)
   }
 
+  async getCurrentURL (): Promise<string> {
+    return this.driver.getCurrentUrl()
+  }
+
   async findButton (name: string): Promise<WebElement> {
     return await this.fuzzyFind(name, this.buttonExpressions, [
       'aria-label',

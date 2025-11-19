@@ -10,22 +10,31 @@ export class Config {
 
     const handler: ProxyHandler<this> = {
       set: (target, key: string, value: any): boolean => {
-        target.set(key, value)
+        if (value === undefined) {
+          target.data[key] = value
+          _env[key] = value
+        } else {
+          if (typeof value === 'string') {
+            _env[key] = value
+          } else {
+            target.data[key] = value
+          }
+        }
         return true
       },
 
       get: (target, key: string): any => {
-        return target.get(key)
+        return _env[key] ?? target.data[key]
       },
 
       ownKeys: (target: this): ArrayLike<string | symbol> => {
         const internalKeys = Object.keys(target.data)
         const envKeys = Object.keys(_env)
-        return [...internalKeys, ...envKeys]
+        return Array.from(new Set([...internalKeys, ...envKeys]))
       },
 
       getOwnPropertyDescriptor: (target: this, key: string): PropertyDescriptor | undefined => {
-        const value = target.get(key)
+        const value = _env[key] ?? target.data[key]
         if (value !== undefined) {
           return {
             value,
@@ -38,17 +47,5 @@ export class Config {
     }
 
     return new Proxy(this, handler)
-  }
-
-  set (key: string, value: any): void {
-    if (typeof value === 'string') {
-      _env[key] = value
-    } else {
-      this.data[key] = value
-    }
-  }
-
-  get (key: string): any {
-    return _env[key] ?? this.data[key]
   }
 }

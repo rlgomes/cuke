@@ -125,7 +125,7 @@ Step('I exec "{arg}" on the docker container "{arg}" and wait for exit code "{ar
     })
   })
 
-Step('I run the following command the docker container "{arg}"',
+Step('I run the following command on the docker container "{arg}":',
   (name: string, command: string) => {
     docker({ cmd: `exec -it ${name} ${command}` })
   })
@@ -172,7 +172,7 @@ Step('I exec "{arg}" on the docker container "{arg}" and wait for stdout to matc
         cmd: `exec -it ${name} ${command}`
       })[0]
 
-      if (stdout.match(output) !== undefined) {
+      if (stdout.match(output) === null) {
         throw new Error(`\n${stdout}\n does not match:\n${output}\n`)
       }
     },

@@ -34,6 +34,14 @@ function initCucumber (): void {
     useForSnippets: false
   })
 
+  defineParameterType({
+    name: 'variable',
+    // match any character but only double quotes if escaped by backslash
+    regexp: /([^"\\]*(\\.[^"\\]*)*)/,
+    transformer: (value) => value,
+    useForSnippets: false
+  })
+
   setWorldConstructor(CukeWorld)
   setDefaultTimeout(30 * 1000)
 }

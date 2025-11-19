@@ -12,16 +12,6 @@ Step('I set the variable "{arg}" to the following:',
   }
 )
 
-Step('I unset the variable "{arg}"', async function (this: CukeWorld, variable: string) {
-  process.env[variable] = undefined
-})
-
-Step('I should see that "{arg}" is empty', async function (this: CukeWorld, value: string) {
-  if (value !== '') {
-    throw new Error(`"${value}" is not empty, is "${value}"`)
-  }
-})
-
 Step('I should see that "{arg}" is equal to "{arg}"',
   async function (this: CukeWorld, value1: string, value2: string) {
     if (value1 !== value2) {

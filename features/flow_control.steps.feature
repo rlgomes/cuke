@@ -10,6 +10,6 @@ Feature: Flow control steps
         Scenario: Just a scenario that fails
           Given I fail
       """
-     When I run the command "cuke run ${OUTPUT_DIR}/i_fail_step.feature"
+     When I run the command "cuke run --output ${OUTPUT_DIR}/i_fail_output ${OUTPUT_DIR}/i_fail_step.feature"
      Then I should see that "${result.stdout}" contains "Error: step failed on purpose"
       And I should see that "${result.status}" is equal to "1"

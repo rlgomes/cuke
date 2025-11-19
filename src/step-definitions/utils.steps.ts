@@ -14,17 +14,27 @@ defineParameterType({
 })
 
 defineParameterType({
+  name: 'value',
+  // match any character but only double quotes if escaped by backslash
+  regexp: /([^"\\]*(\\.[^"\\]*)*)/,
+  transformer: (value) => value,
+  useForSnippets: false
+})
+
+defineParameterType({
   name: 'seconds',
   regexp: /.*/,
   transformer: (value) => value,
   useForSnippets: false
 })
 
-type Finder = (this: CukeWorld, input: string) => Promise<WebElement>
 type Actioner = (this: CukeWorld, element: WebElement) => Promise<void>
 type Checker = (this: CukeWorld, element: WebElement) => Promise<boolean>
+type Finder = (this: CukeWorld, input: string) => Promise<WebElement>
+type Getter = (this: CukeWorld) => Promise<string>
+type NamedGetter = (this: CukeWorld, name: string) => Promise<string>
 
-export function defineActionSteps (
+function defineActionSteps (
   actionName: string,
   actionFunction: Actioner,
   elementName: string,
@@ -56,7 +66,7 @@ export function defineActionSteps (
     })
 }
 
-export function defineVisibilitySteps (
+function defineVisibilitySteps (
   elementName: string,
   findFunction: Finder
 ): void {
@@ -92,7 +102,7 @@ export function defineVisibilitySteps (
     })
 }
 
-export function defineInStateSteps (
+function defineInStateSteps (
   elementName: string,
   findFunction: Finder,
   stateName: string,
@@ -128,4 +138,67 @@ export function defineInStateSteps (
         timeout: parseInt(seconds) * 1000
       })
     })
+}
+
+function defineElementValueSteps (
+  elementName: string,
+  getterFunction: Getter
+): void {
+  Step(`I should see the ${elementName} is equal to "{value}"`,
+    async function (this: CukeWorld, value: string) {
+      const actualValue = await getterFunction.bind(this)()
+      if (value !== actualValue) {
+        throw new Error(`${elementName} is "${actualValue}", expected "${value}"`)
+      }
+    })
+
+  Step(`I wait to see the ${elementName} is equal to "{value}"`,
+    async function (this: CukeWorld, value: string) {
+      await this.waitFor(async () => {
+        const actualValue = await getterFunction.bind(this)()
+        if (value !== actualValue) {
+          throw new Error(`${elementName} is "${actualValue}", expected "${value}"`)
+        }
+      })
+    })
+
+  Step(`I should see the ${elementName} matches "{value}"`,
+    async function (this: CukeWorld, value: string) {
+      const actualValue = await getterFunction.bind(this)()
+      if (actualValue.match(value) == null) {
+        throw new Error(`${elementName} is "${actualValue}", expected to match "${value}"`)
+      }
+    })
+
+  Step(`I wait to see the ${elementName} matches "{value}"`,
+    async function (this: CukeWorld, value: string) {
+      await this.waitFor(async () => {
+        const actualValue = await getterFunction.bind(this)()
+        if (actualValue.match(value) == null) {
+          throw new Error(`${elementName} is "${actualValue}", expected to match "${value}"`)
+        }
+      })
+    })
+}
+
+function defineNamedElementValueSteps (
+  elementName: string,
+  getterFunction: NamedGetter
+): void {
+  Step(`I should see the ${elementName} "{name}" is equal to "{value}"`,
+    async function (this: CukeWorld, name: string, value: string) {
+      const actualValue = await getterFunction.bind(this)(name)
+      if (value !== actualValue) {
+        throw new Error(`${elementName} "${name}" is "${actualValue}", expected "${value}"`)
+      }
+    })
+}
+
+export {
+  defineActionSteps,
+  defineVisibilitySteps,
+  defineInStateSteps,
+
+  defineElementValueSteps,
+  defineNamedElementValueSteps
 }

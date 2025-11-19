@@ -5,7 +5,7 @@ Feature: Basic CLI Usage
 
   Scenario: User can get help menu when no arguments are given
     Given I run the command "cuke"
-     Then I should see that "${result.stdout}" is empty
+     Then I should see that "${result.stdout}" is equal to ""
       And I should see that "${result.stderr}" contains the following:
       """
       Usage: cuke [options] [command]

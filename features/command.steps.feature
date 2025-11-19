@@ -17,7 +17,7 @@ Feature: Command steps
       hello world
 
       """
-      And I should see that "${result.stderr}" is empty
+      And I should see that "${result.stderr}" is equal to ""
 
   Scenario: User gets expected exit code when running a failing command
     Given I run the command "ls non-existent-file"
