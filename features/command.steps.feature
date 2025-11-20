@@ -20,5 +20,5 @@ Feature: Command steps
       And I should see that "${result.stderr}" is equal to ""
 
   Scenario: User gets expected exit code when running a failing command
-    Given I run the command "ls non-existent-file"
+    Given I run the command "${SHELL} -c 'exit 1'"
      Then I should see that "${result.status}" is equal to "1"
