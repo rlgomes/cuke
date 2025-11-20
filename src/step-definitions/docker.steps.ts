@@ -110,14 +110,14 @@ Step('I kill and remove the docker container "{arg}" if it exists',
 
 Step('I exec "{arg}" on the docker container "{arg}"',
   (command: string, name: string) => {
-    docker({ cmd: `exec -it ${name} ${command}` })
+    docker({ cmd: `exec -i ${name} ${command}` })
   })
 
 Step('I exec "{arg}" on the docker container "{arg}" and wait for exit code "{arg}"',
   async function (this: CukeWorld, command: string, name: string, exitCode: string) {
     await this.waitFor(async () => {
       docker({
-        cmd: `exec -it ${name} ${command}`,
+        cmd: `exec -i ${name} ${command}`,
         options: {
           expectedExitCode: exitCode
         }
@@ -127,7 +127,7 @@ Step('I exec "{arg}" on the docker container "{arg}" and wait for exit code "{ar
 
 Step('I run the following command on the docker container "{arg}":',
   (name: string, command: string) => {
-    docker({ cmd: `exec -it ${name} ${command}` })
+    docker({ cmd: `exec -i ${name} ${command}` })
   })
 
 function listNetworks (): string[] {
@@ -153,7 +153,7 @@ Step('I exec "{arg}" on the docker container "{arg}" and wait for stdout to cont
   async function (this: CukeWorld, command: string, name: string, output: string) {
     await this.waitFor(async () => {
       const stdout = docker({
-        cmd: `exec -it ${name} ${command}`
+        cmd: `exec -i ${name} ${command}`
       })[0]
 
       if (!stdout.includes(output)) {
@@ -169,7 +169,7 @@ Step('I exec "{arg}" on the docker container "{arg}" and wait for stdout to matc
   async function (this: CukeWorld, command: string, name: string, output: string) {
     await this.waitFor(async () => {
       const stdout = docker({
-        cmd: `exec -it ${name} ${command}`
+        cmd: `exec -i ${name} ${command}`
       })[0]
 
       if (stdout.match(output) === null) {
@@ -185,7 +185,7 @@ Step('I exec "{arg}" on the docker container "{arg}" and save stdout to the vari
   async function (this: CukeWorld, command: string, name: string, variableName: string) {
     await this.waitFor(async () => {
       const stdout = docker({
-        cmd: `exec -it ${name} ${command}`
+        cmd: `exec -i ${name} ${command}`
       })[0]
 
       process.env[variableName] = stdout
