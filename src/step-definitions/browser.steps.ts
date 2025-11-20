@@ -33,4 +33,29 @@ Step('I save the current browser URL to "{variable}"',
   }
 )
 
+Step('I open a new tab',
+  async function (this: CukeWorld) {
+    await this.openNewTab()
+  })
+
+Step('I open a new tab at "{arg}"',
+  async function (this: CukeWorld, url: string) {
+    await this.openNewTab(url)
+  })
+
+Step('I switch to the next tab',
+  async function (this: CukeWorld) {
+    await this.switchToNextTab()
+  })
+
+Step('I switch to the previous tab',
+  async function (this: CukeWorld) {
+    await this.switchToPreviousTab()
+  })
+
+Step('I close the current tab',
+  async function (this: CukeWorld) {
+    await this.closeCurrentTab()
+  })
+
 defineElementValueSteps('browser URL', getCurrentURL)

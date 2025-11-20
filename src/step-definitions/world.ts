@@ -126,6 +126,130 @@ export class CukeWorld extends World {
     return this.driver.getCurrentUrl()
   }
 
+  async getTabCount (): Promise<number> {
+    const handles = await this.driver.getAllWindowHandles()
+    return handles.length
+  }
+
+  async openNewTab (url?: string): Promise<void> {
+    if (this.driver === undefined) {
+      throw new Error('no current browser open')
+    }
+
+    // Store the current window handle
+    const originalHandle = await this.driver.getWindowHandle()
+
+    // Open a new tab using JavaScript
+    await this.driver.executeScript('window.open(arguments[0] || "", "_blank")', url || '')
+
+    // Get all window handles
+    const handles = await this.driver.getAllWindowHandles()
+
+    // Find the new handle (it should be different from the original)
+    const newHandle = handles.find((handle: string) => handle !== originalHandle)
+
+    if (newHandle === undefined) {
+      throw new Error('failed to open new tab')
+    }
+
+    // Switch to the new tab
+    await this.driver.switchTo().window(newHandle)
+
+    // If a URL was provided, navigate to it
+    if (url !== undefined && url !== '') {
+      await this.driver.get(url)
+      await this.waitForPageToLoad()
+    }
+  }
+
+  async switchToTab (index: number): Promise<void> {
+    if (this.driver === undefined) {
+      throw new Error('no current browser open')
+    }
+
+    const handles = await this.driver.getAllWindowHandles()
+
+    if (index < 0 || index >= handles.length) {
+      throw new Error(`tab index ${index} is out of range. There are ${handles.length} tabs available.`)
+    }
+
+    await this.driver.switchTo().window(handles[index])
+    await this.waitForPageToLoad()
+  }
+
+  async switchToNextTab (): Promise<void> {
+    if (this.driver === undefined) {
+      throw new Error('no current browser open')
+    }
+
+    const handles = await this.driver.getAllWindowHandles()
+
+    if (handles.length < 2) {
+      throw new Error('cannot switch tabs: only one tab is open')
+    }
+
+    const currentHandle = await this.driver.getWindowHandle()
+    const currentIndex: number = handles.indexOf(currentHandle)
+
+    if (currentIndex === -1) {
+      throw new Error('current tab handle not found')
+    }
+
+    // Switch to next tab, wrapping around if at the end
+    const nextIndex = (currentIndex + 1) % handles.length
+    await this.driver.switchTo().window(handles[nextIndex])
+    await this.waitForPageToLoad()
+  }
+
+  async switchToPreviousTab (): Promise<void> {
+    if (this.driver === undefined) {
+      throw new Error('no current browser open')
+    }
+
+    const handles = await this.driver.getAllWindowHandles()
+
+    if (handles.length < 2) {
+      throw new Error('cannot switch tabs: only one tab is open')
+    }
+
+    const currentHandle = await this.driver.getWindowHandle()
+    const currentIndex = handles.indexOf(currentHandle)
+
+    if (currentIndex === -1) {
+      throw new Error('current tab handle not found')
+    }
+
+    // Switch to previous tab, wrapping around if at the beginning
+    const previousIndex = (currentIndex - 1 + handles.length) % handles.length
+    await this.driver.switchTo().window(handles[previousIndex])
+    await this.waitForPageToLoad()
+  }
+
+  async closeCurrentTab (): Promise<void> {
+    if (this.driver === undefined) {
+      throw new Error('no current browser open')
+    }
+
+    const handles = await this.driver.getAllWindowHandles()
+
+    if (handles.length === 1) {
+      throw new Error('cannot close the last remaining tab')
+    }
+
+    // Close the current tab
+    await this.driver.close()
+
+    // Switch to the first remaining tab
+    const remainingHandles = await this.driver.getAllWindowHandles()
+    if (remainingHandles.length > 0) {
+      await this.driver.switchTo().window(remainingHandles[0])
+      await this.waitForPageToLoad()
+    } else {
+      // If no tabs remain, set driver to undefined
+      this.driver = undefined
+    }
+  }
+
   async findButton (name: string): Promise<WebElement> {
     return await this.fuzzyFind(name, this.buttonExpressions, [
       'aria-label',
@@ -346,8 +470,8 @@ export class CukeWorld extends World {
         backoff: 'FIXED',
         retries: 'INFINITELY',
         // default to wait for 20s
-        timeout: options?.timeout ?? 10000,
-        delay: options?.delay ?? 100,
+        timeout: options?.timeout ?? 20000,
+        delay: options?.delay ?? 250,
         retryIf: (error: Error): boolean => {
           lastError = error
           return true

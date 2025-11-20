@@ -4,6 +4,8 @@ import {
   setDefaultTimeout,
   setWorldConstructor,
 
+  AfterAll,
+  BeforeAll,
   DataTable
 } from '@cucumber/cucumber'
 
@@ -137,10 +139,10 @@ async function cucumber (paths: string[] = [], options: Options): Promise<void> 
 
         // load custom local steps from a step-definitions directory
         // and handle .js or .ts files
-        join(cwd(), 'step-definitions/**/*.ts'),
-        join(cwd(), 'step-definitions/*.ts'),
-        join(cwd(), 'step-definitions/**/*.js'),
-        join(cwd(), 'step-definitions/*.js')
+        join(cwd(), 'features/step-definitions/**/*.ts'),
+        join(cwd(), 'features/step-definitions/*.ts'),
+        join(cwd(), 'features/step-definitions/**/*.js'),
+        join(cwd(), 'features/step-definitions/*.js')
       ],
       formatOptions: {
         colorsEnabled: true,
@@ -225,6 +227,9 @@ export {
   cucumber,
   initCucumber,
   steps,
+
+  AfterAll,
+  BeforeAll,
 
   Step
 }
