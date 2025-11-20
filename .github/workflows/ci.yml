@@ -32,7 +32,7 @@ jobs:
     - name: Run coverage check
       run: npm run coverage
 
-    - name: Upload coverage reports
+    - name: Upload test reports
       uses: actions/upload-artifact@v4
       if: always()
       with:
@@ -40,4 +40,7 @@ jobs:
         path: |
           coverage/
           .nyc_output/
+        name: test-report
+        path: |
+          output/
 
