@@ -37,8 +37,8 @@ export class CukeWorld extends World {
     prefs.setLevel(logging.Type.BROWSER, logging.Level.ALL)
     options.setLoggingPrefs(prefs)
 
-    const width = process.env.BROWSER_WIDTH ?? '1920'
-    const height = process.env.BROWSER_HEIGHT ?? '1200'
+    const width: string = process.env.BROWSER_WIDTH ?? '1920'
+    const height: string = process.env.BROWSER_HEIGHT ?? '1200'
 
     options.addArguments(`--window-size=${width},${height}`)
 

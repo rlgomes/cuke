@@ -1,40 +1,14 @@
-import { type CukeWorld, Step } from '../index'
+import type { CukeWorld, WebElement } from './world'
+import { Step } from '../index'
+import {
+  defineVisibilitySteps
+} from './utils.steps'
 
-Step('I should see the text "{arg}"',
-  async function (this: CukeWorld, value: string) {
-    const text = await this.findText(value)
-    if (text === undefined) {
-      throw new Error(`unable to find the text "${value}"`)
-    }
-  })
+async function findText (this: CukeWorld, name: string): Promise<WebElement> {
+  return await this.findText(name)
+}
 
-Step('I should not see the text "{arg}"',
-  async function (this: CukeWorld, value: string) {
-    const text = await this.findText(value)
-    if (text !== undefined) {
-      throw new Error(`able to find the text "${value}"`)
-    }
-  })
-
-Step('I wait to see the text "{arg}"',
-  async function (this: CukeWorld, value: string) {
-    await this.waitFor(async () => {
-      const text = await this.findText(value)
-      if (text === undefined) {
-        throw new Error(`unable to find the text "${value}"`)
-      }
-    })
-  })
-
-Step('I wait to not see the text "{arg}"',
-  async function (this: CukeWorld, value: string) {
-    await this.waitFor(async () => {
-      const text = await this.findText(value)
-      if (text !== undefined) {
-        throw new Error(`able to find the text "${value}"`)
-      }
-    })
-  })
+defineVisibilitySteps('text', findText)
 
 Step('I hover over the text "{arg}"',
   async function (this: CukeWorld, name: string) {

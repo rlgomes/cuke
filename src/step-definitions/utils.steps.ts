@@ -42,20 +42,14 @@ function defineActionSteps (
 ): void {
   Step(`I ${actionName} the ${elementName} "{name}"`,
     async function (this: CukeWorld, name: string) {
-      const element = await findFunction.bind(this)(name)
-      await actionFunction.bind(this)(element)
-    })
-
-  Step(`I wait to ${actionName} the ${elementName} "{name}"`,
-    async function (this: CukeWorld, name: string) {
       await this.waitFor(async () => {
         const element = await findFunction.bind(this)(name)
         await actionFunction.bind(this)(element)
       })
     })
 
-  Step(`I wait up to "{seconds}" seconds to ${actionName} the ${elementName} "{name}"`,
-    async function (this: CukeWorld, seconds: string, name: string) {
+  Step(`I ${actionName} the ${elementName} "{name}" waiting up to "{seconds}" seconds`,
+    async function (this: CukeWorld, name: string, seconds: string) {
       await this.waitFor(async () => {
         const element = await findFunction.bind(this)(name)
         await actionFunction.bind(this)(element)
@@ -72,14 +66,6 @@ function defineVisibilitySteps (
 ): void {
   Step(`I should see the ${elementName} "{name}"`,
     async function (this: CukeWorld, name: string) {
-      const element = await findFunction.bind(this)(name)
-      if (element == null) {
-        throw new Error(`unable to find ${elementName} "${name}"`)
-      }
-    })
-
-  Step(`I wait to see the ${elementName} "{name}"`,
-    async function (this: CukeWorld, name: string) {
       await this.waitFor(async () => {
         const element = await findFunction.bind(this)(name)
         if (element == null) {
@@ -88,12 +74,35 @@ function defineVisibilitySteps (
       })
     })
 
-  Step(`I wait up to "{seconds}" seconds to see the ${elementName} "{name}"`,
-    async function (this: CukeWorld, seconds: string, name: string) {
+  Step(`I should see the ${elementName} "{name}" waiting up to "{seconds}" seconds`,
+    async function (this: CukeWorld, name: string, seconds: string) {
       await this.waitFor(async () => {
         const element = await findFunction.bind(this)(name)
         if (element == null) {
           throw new Error(`unable to find ${elementName} "${name}"`)
+        }
+      },
+      {
+        timeout: parseInt(seconds) * 1000
+      })
+    })
+
+  Step(`I should not see the ${elementName} "{name}"`,
+    async function (this: CukeWorld, name: string) {
+      await this.waitFor(async () => {
+        const element = await findFunction.bind(this)(name)
+        if (element != null) {
+          throw new Error(`able to find ${elementName} "${name}"`)
+        }
+      })
+    })
+
+  Step(`I should not see the ${elementName} "{name}" waiting up to "{seconds}" seconds`,
+    async function (this: CukeWorld, name: string, seconds: string) {
+      await this.waitFor(async () => {
+        const element = await findFunction.bind(this)(name)
+        if (element != null) {
+          throw new Error(`able to find ${elementName} "${name}"`)
         }
       },
       {
@@ -110,14 +119,6 @@ function defineInStateSteps (
 ): void {
   Step(`I should see the ${elementName} "{name}" is ${stateName}`,
     async function (this: CukeWorld, name: string) {
-      const element = await findFunction.bind(this)(name)
-      if (!await checkFunction.bind(this)(element)) {
-        throw new Error(`unable to find ${elementName} "${name}" is ${stateName}`)
-      }
-    })
-
-  Step(`I wait to see the ${elementName} "{name}" is ${stateName}`,
-    async function (this: CukeWorld, name: string) {
       await this.waitFor(async () => {
         const element = await findFunction.bind(this)(name)
         if (!(await checkFunction.bind(this)(element))) {
@@ -126,8 +127,8 @@ function defineInStateSteps (
       })
     })
 
-  Step(`I wait up to "{seconds}" seconds to see the ${elementName} "{name}" is ${stateName}`,
-    async function (this: CukeWorld, seconds: string, name: string) {
+  Step(`I should see the ${elementName} "{name}" is ${stateName} waiting up to "{seconds}" seconds`,
+    async function (this: CukeWorld, name: string, seconds: string) {
       await this.waitFor(async () => {
         const element = await findFunction.bind(this)(name)
         if (!(await checkFunction.bind(this)(element))) {
@@ -146,14 +147,6 @@ function defineElementValueSteps (
 ): void {
   Step(`I should see the ${elementName} is equal to "{value}"`,
     async function (this: CukeWorld, value: string) {
-      const actualValue = await getterFunction.bind(this)()
-      if (value !== actualValue) {
-        throw new Error(`${elementName} is "${actualValue}", expected "${value}"`)
-      }
-    })
-
-  Step(`I wait to see the ${elementName} is equal to "{value}"`,
-    async function (this: CukeWorld, value: string) {
       await this.waitFor(async () => {
         const actualValue = await getterFunction.bind(this)()
         if (value !== actualValue) {
@@ -163,14 +156,6 @@ function defineElementValueSteps (
     })
 
   Step(`I should see the ${elementName} matches "{value}"`,
-    async function (this: CukeWorld, value: string) {
-      const actualValue = await getterFunction.bind(this)()
-      if (actualValue.match(value) == null) {
-        throw new Error(`${elementName} is "${actualValue}", expected to match "${value}"`)
-      }
-    })
-
-  Step(`I wait to see the ${elementName} matches "{value}"`,
     async function (this: CukeWorld, value: string) {
       await this.waitFor(async () => {
         const actualValue = await getterFunction.bind(this)()

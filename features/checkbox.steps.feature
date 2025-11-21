@@ -31,12 +31,12 @@ Feature: Checkbox steps
 
   Scenario: User can wait to check a checkbox
     Given I open a browser at "file://${PWD}/data/checkboxes.html"
-     When I wait to check the checkbox "checkbox that appears 2 seconds later"
+     When I check the checkbox "checkbox that appears 2 seconds later"
      Then I should see the checkbox "checkbox that appears 2 seconds later" is checked
 
   Scenario: User can wait up to a specific number of seconds to check a checkbox
     Given I open a browser at "file://${PWD}/data/checkboxes.html"
-     When I wait up to "5" seconds to check the checkbox "checkbox that appears 2 seconds later"
+     When I check the checkbox "checkbox that appears 2 seconds later" waiting up to "5" seconds
      Then I should see the checkbox "checkbox that appears 2 seconds later" is checked
 
   Scenario: User can uncheck a checkbox
@@ -50,35 +50,35 @@ Feature: Checkbox steps
   Scenario: User can wait to uncheck a checkbox
     Given I open a browser at "file://${PWD}/data/checkboxes.html"
      Then I should see the checkbox "checkbox to uncheck" is checked
-     When I wait to uncheck the checkbox "checkbox to uncheck"
+     When I uncheck the checkbox "checkbox to uncheck"
      Then I should see the checkbox "checkbox to uncheck" is unchecked
 
   Scenario: User can wait up to a specific number of seconds to uncheck a checkbox
     Given I open a browser at "file://${PWD}/data/checkboxes.html"
      Then I should see the checkbox "checkbox to uncheck" is checked
-     When I wait up to "5" seconds to uncheck the checkbox "checkbox to uncheck"
+     When I uncheck the checkbox "checkbox to uncheck" waiting up to "5" seconds
      Then I should see the checkbox "checkbox to uncheck" is unchecked
 
   Scenario: User can wait to see a checkbox
     Given I open a browser at "file://${PWD}/data/checkboxes.html"
-     Then I wait to see the checkbox "checkbox that appears 2 seconds later"
+     Then I should see the checkbox "checkbox that appears 2 seconds later"
 
   Scenario: User can wait up to a specific number of seconds to see a checkbox
     Given I open a browser at "file://${PWD}/data/checkboxes.html"
-     Then I wait up to "5" seconds to see the checkbox "checkbox that appears 2 seconds later"
+     Then I should see the checkbox "checkbox that appears 2 seconds later" waiting up to "5" seconds
 
   Scenario: User can wait to see a checkbox is checked
     Given I open a browser at "file://${PWD}/data/checkboxes.html"
-     Then I wait to see the checkbox "checkbox that becomes checked" is checked
+     Then I should see the checkbox "checkbox that becomes checked" is checked
 
   Scenario: User can wait up to a specific number of seconds to see a checkbox is checked
     Given I open a browser at "file://${PWD}/data/checkboxes.html"
-     Then I wait up to "5" seconds to see the checkbox "checkbox that becomes checked" is checked
+     Then I should see the checkbox "checkbox that becomes checked" is checked waiting up to "5" seconds
 
   Scenario: User can wait to see a checkbox is unchecked
     Given I open a browser at "file://${PWD}/data/checkboxes.html"
-     Then I wait to see the checkbox "checkbox that becomes unchecked" is unchecked
+     Then I should see the checkbox "checkbox that becomes unchecked" is unchecked
 
   Scenario: User can wait up to a specific number of seconds to see a checkbox is unchecked
     Given I open a browser at "file://${PWD}/data/checkboxes.html"
-     Then I wait up to "5" seconds to see the checkbox "checkbox that becomes unchecked" is unchecked
+     Then I should see the checkbox "checkbox that becomes unchecked" is unchecked waiting up to "5" seconds

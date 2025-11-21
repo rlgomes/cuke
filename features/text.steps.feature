@@ -11,16 +11,15 @@ Feature: Text steps
 
   Scenario: User can wait to see text
     Given I open a browser at "file://${PWD}/data/text.html"
-     Then I wait to see the text "text that appears 2 seconds later"
+     Then I should see the text "text that appears 2 seconds later"
 
   Scenario: User can wait to not see text
     Given I open a browser at "file://${PWD}/data/text.html"
      Then I should see the text "This is some visible text"
-     Then I wait to not see the text "This is some visible text"
+     Then I should not see the text "This is some visible text"
 
   Scenario: User can hover over text
     Given I open a browser at "file://${PWD}/data/text.html"
      Then I should see the text "not hovered"
      When I hover over the text "text to hover over"
      Then I should see the text "hovered"
-
