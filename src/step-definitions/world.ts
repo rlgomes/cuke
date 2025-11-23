@@ -37,8 +37,8 @@ export class CukeWorld extends World {
     prefs.setLevel(logging.Type.BROWSER, logging.Level.ALL)
     options.setLoggingPrefs(prefs)
 
-    const width = process.env.BROWSER_WIDTH ?? '1920'
-    const height = process.env.BROWSER_HEIGHT ?? '1200'
+    const width: string = process.env.BROWSER_WIDTH ?? '1920'
+    const height: string = process.env.BROWSER_HEIGHT ?? '1200'
 
     options.addArguments(`--window-size=${width},${height}`)
 
@@ -64,7 +64,14 @@ export class CukeWorld extends World {
     await this.driver.navigate().refresh()
   }
 
-  async fuzzyFind (name: string, tags: string[], attributes: string[] = [], index: number = 0, direction: string = 'l2r', filterInvisible: boolean = true): Promise<WebElement> {
+  async fuzzyFind (
+    name: string,
+    tags: string[],
+    attributes: string[] = [],
+    index: number = 0,
+    direction: string = 'l2r',
+    filterInvisible: boolean = true
+  ): Promise<WebElement> {
     const filterBy = filterInvisible ? ':visible' : ''
     this.debug(`fuzzy('${name}', ${JSON.stringify(tags)}, ${JSON.stringify(attributes)}, '${direction}', '${filterBy}')`)
 
@@ -106,20 +113,6 @@ export class CukeWorld extends World {
       this.debug('fuzzy returning', await element.getAttribute('outerHTML'))
     }
     return element
-  }
-
-  buttonExpressions: string[] = [
-    'a',
-    'button',
-    'input[type=submit]',
-    '*[role=button]',
-    'input[type=radio]',
-    '*[role=menuitem]',
-    '*[role=tab]'
-  ]
-
-  registerButtonCSSExpression (expression: string): void {
-    this.buttonExpressions.push(expression)
   }
 
   async getCurrentURL (): Promise<string> {
@@ -250,12 +243,32 @@ export class CukeWorld extends World {
     }
   }
 
+  buttonExpressions: string[] = [
+    'a',
+    'button',
+    'input[type=submit]',
+    '*[role=button]',
+    'input[type=radio]',
+    '*[role=menuitem]',
+    '*[role=tab]'
+  ]
+
+  registerButtonCSSExpression (expression: string): void {
+    this.buttonExpressions.push(expression)
+  }
+
+  buttonAttributes: string [] = [
+    'aria-label',
+    'title',
+    'placeholder'
+  ]
+
+  registerButtonAttributes (name: string): void {
+    this.buttonAttributes.push(name)
+  }
+
   async findButton (name: string): Promise<WebElement> {
-    return await this.fuzzyFind(name, this.buttonExpressions, [
-      'aria-label',
-      'title',
-      'placeholder'
-    ])
+    return await this.fuzzyFind(name, this.buttonExpressions, this.buttonAttributes)
   }
 
   async clickElement (element: WebElement): Promise<void> {
@@ -352,12 +365,22 @@ export class CukeWorld extends World {
     )
   }
 
+  inputExpressions: string[] = [
+    'input',
+    'textarea',
+    '*[role=textbox]',
+    '*[role=searchbox]',
+    '*[contenteditable]'
+  ]
+
+  inputAttributes: string[] = [
+    'aria-label',
+    'title',
+    'placeholder'
+  ]
+
   async findInput (name: string): Promise<WebElement> {
-    return await this.fuzzyFind(
-      name,
-      ['input'],
-      ['aria-label', 'title', 'placeholder']
-    )
+    return await this.fuzzyFind(name, this.inputExpressions, this.inputAttributes)
   }
 
   async clearInput (name: string): Promise<void> {
@@ -377,6 +400,10 @@ export class CukeWorld extends World {
 
   async writeIntoInput (name: string, value: string): Promise<void> {
     const input = await this.findInput(name)
+    if (input == null) {
+      throw Error(`unable to find input "${name}"`)
+    }
+
     await this.clearElement(input)
     await input.sendKeys(value)
   }

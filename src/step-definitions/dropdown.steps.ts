@@ -12,12 +12,6 @@ defineVisibilitySteps('dropdown', findDropdown)
 
 Step('I select the option "{arg}" from the dropdown "{arg}"',
   async function (this: CukeWorld, optionName: string, dropdownName: string) {
-    await this.selectOptionInDropdown(optionName, dropdownName)
-  }
-)
-
-Step('I wait to select the option "{arg}" from the dropdown "{arg}"',
-  async function (this: CukeWorld, optionName: string, dropdownName: string) {
     await this.waitFor(async () => {
       await this.selectOptionInDropdown(optionName, dropdownName)
     })
@@ -26,17 +20,19 @@ Step('I wait to select the option "{arg}" from the dropdown "{arg}"',
 
 Step('I should see the option "{arg}" in the dropdown "{arg}" is selected',
   async function (this: CukeWorld, optionName: string, dropdownName: string) {
-    /// XXX needs work to actually associate the option to the dropdown name
-    const option = await this.findDropdownOption(optionName)
-    if (option === undefined) {
-      throw new Error(
-        `unable to find dropdown "${dropdownName}" option "${optionName}"`
-      )
-    }
+    await this.waitFor(async () => {
+      /// XXX needs work to actually associate the option to the dropdown name
+      const option = await this.findDropdownOption(optionName)
+      if (option === undefined) {
+        throw new Error(
+          `unable to find dropdown "${dropdownName}" option "${optionName}"`
+        )
+      }
 
-    const selected = await option.getAttribute('selected')
-    if (selected === undefined) {
-      throw new Error(`dropdown option "${optionName}" is not selected`)
-    }
+      const selected = await option.getAttribute('selected')
+      if (selected === undefined) {
+        throw new Error(`dropdown option "${optionName}" is not selected`)
+      }
+    })
   }
 )

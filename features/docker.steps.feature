@@ -12,7 +12,7 @@ Feature: Docker steps
       And I run the docker container "cuke-httpd-test" with image "httpd:latest"
      Then I save the host port for the guest port "80" of the docker container "cuke-httpd-test" to the variable "HTTPD_WEB_PORT"
      When I open a browser at "http://localhost:${HTTPD_WEB_PORT}"
-      And I wait to see the text "It works!"
+      And I should see the text "It works!"
 
   Scenario: User can run a container with specific port mappings
     Given I kill and remove the docker container "cuke-nginx-test" if it exists

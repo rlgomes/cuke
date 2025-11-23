@@ -13,6 +13,12 @@
     <br/>
     <input onkeypress="touched('input that becomes enabled')" id="disabled-input" disabled placeholder="input that becomes enabled"></input>
     <br/>
+    <input id="input-that-disappears" placeholder="input that disappears"></input>
+    <br/>
+    <input id="input-that-stays-disabled" disabled placeholder="input that stays disabled"></input>
+    <br/>
+    <input id="input-that-changes-value" value="initial" placeholder="input that changes value"></input>
+    <br/>
 
     <div id="tail"></div>
     <script>
@@ -30,6 +36,18 @@
         // enable the disabled input
         var disabledInput = document.querySelector("#disabled-input");
         disabledInput.removeAttribute("disabled")
+
+        // remove the input that disappears
+        var disappearingInput = document.querySelector("#input-that-disappears");
+        if (disappearingInput && disappearingInput.parentNode) {
+          disappearingInput.parentNode.removeChild(disappearingInput);
+        }
+
+        // change the value of the input that changes value
+        var changingInput = document.querySelector("#input-that-changes-value");
+        if (changingInput) {
+          changingInput.value = "changed";
+        }
       }, 2000);
     </script>
   </body>

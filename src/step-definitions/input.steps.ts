@@ -1,15 +1,24 @@
-import { type CukeWorld, Step } from '../index'
+import { type CukeWorld, type WebElement, Step } from '../index'
+import {
+  defineVisibilitySteps,
+  defineInStateSteps
+} from './utils.steps'
 
 Step('I write "{arg}" into the input "{arg}"',
   async function (this: CukeWorld, value: string, name: string) {
-    await this.writeIntoInput(name, value)
+    await this.waitFor(async () => {
+      await this.writeIntoInput(name, value)
+    })
   }
 )
 
-Step('I wait to write "{arg}" into the input "{arg}"',
-  async function (this: CukeWorld, value: string, name: string) {
+Step('I write "{arg}" into the input "{arg}" waiting up to "{seconds}" seconds',
+  async function (this: CukeWorld, value: string, name: string, seconds: string) {
     await this.waitFor(async () => {
       await this.writeIntoInput(name, value)
+    },
+    {
+      timeout: parseInt(seconds) * 1000
     })
   }
 )
@@ -21,58 +30,47 @@ Step('I clear the input "{arg}"',
 
 Step('I should see the input "{arg}" is equal to "{arg}"',
   async function (this: CukeWorld, name: string, value: string) {
-    const input = await this.findInput(name)
-    const inputValue: string = await input.getAttribute('value')
-    if (inputValue !== value) {
-      throw new Error(
-        `input ${name} has value ${inputValue} instead of expected ${value}`
-      )
-    }
+    await this.waitFor(async () => {
+      const input = await this.findInput(name)
+      const inputValue: string = await input.getAttribute('value')
+      if (inputValue !== value) {
+        throw new Error(
+          `input ${name} has value ${inputValue} instead of expected ${value}`
+        )
+      }
+    })
   }
 )
 
-Step('I should see the input "{arg}"',
-  async function (this: CukeWorld, name: string) {
-    const input = await this.findInput(name)
-    if (input === undefined) {
-      throw new Error(`unable to find input "${name}"`)
-    }
-  })
-
-Step('I wait to see the input "{arg}"',
-  async function (this: CukeWorld, name: string) {
+Step('I should see the input "{arg}" is equal to "{arg}" waiting up to "{seconds}" seconds',
+  async function (this: CukeWorld, name: string, value: string, seconds: string) {
     await this.waitFor(async () => {
       const input = await this.findInput(name)
-      if (input === undefined) {
-        throw new Error(`unable to find input "${name}"`)
+      const inputValue: string = await input.getAttribute('value')
+      if (inputValue !== value) {
+        throw new Error(
+          `input ${name} has value ${inputValue} instead of expected ${value}`
+        )
       }
+    },
+    {
+      timeout: parseInt(seconds) * 1000
     })
-  })
+  }
+)
 
-Step('I should see the input "{arg}" is enabled',
-  async function (this: CukeWorld, name: string) {
-    const input = await this.findInput(name)
-    if (input === undefined) {
-      throw new Error(`unable to find input "${name}"`)
-    }
+async function findInput (this: CukeWorld, name: string): Promise<WebElement> {
+  return await this.findInput(name)
+}
 
-    if (await this.isDisabled(input)) {
-      throw new Error(`input "${name}" is disabled`)
-    }
-  })
+async function isEnabled (this: CukeWorld, element: WebElement): Promise<boolean> {
+  return await this.isEnabled(element)
+}
 
-Step('I wait to see the input "{arg}" is enabled',
-  async function (this: CukeWorld, name: string) {
-    await this.waitFor(async () => {
-      const input = await this.findInput(name)
+async function isDisabled (this: CukeWorld, element: WebElement): Promise<boolean> {
+  return await this.isDisabled(element)
+}
 
-      if (input === undefined) {
-        throw new Error(`unable to find input "${name}"`)
-      }
-
-      const disabled = await input.getAttribute('disabled') ?? undefined
-      if (disabled !== undefined) {
-        throw new Error(`input "${name}" is disabled`)
-      }
-    })
-  })
+defineVisibilitySteps('input', findInput)
+defineInStateSteps('input', findInput, 'enabled', isEnabled)
+defineInStateSteps('input', findInput, 'disabled', isDisabled)

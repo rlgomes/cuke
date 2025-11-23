@@ -26,7 +26,7 @@ Feature: Switch steps
   Scenario: User can wait to turn on a switch
     Given I open a browser at "file://${PWD}/data/switches.html"
      Then I should see the switch "switch that turns on" is off
-     When I wait to turn on the switch "switch that turns on"
+     When I turn on the switch "switch that turns on"
      Then I should see the switch "switch that turns on" is on
 
   Scenario: User can assert a switch is on
