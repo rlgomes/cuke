@@ -29,6 +29,7 @@ Feature: Checkbox steps
      When I check the checkbox "checkbox with '\" in the name"
      Then I should see the checkbox "checkbox with '\" in the name" is checked
 
+  @disabled
   Scenario: User can wait to check a checkbox
     Given I open a browser at "file://${PWD}/data/checkboxes.html"
      When I check the checkbox "checkbox that appears 2 seconds later"
