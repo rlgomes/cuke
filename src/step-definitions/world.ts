@@ -42,8 +42,8 @@ export class CukeWorld extends World {
 
     options.addArguments(`--window-size=${width},${height}`)
 
-    const userDataDir = process.env.CHROME_USER_DATA_DIR ?? undefined
-    if (userDataDir !== undefined) {
+    const userDataDir: string = process.env.CHROME_USER_DATA_DIR
+    if (userDataDir != null) {
       options.addArguments(`--user-data-dir=${userDataDir}`)
     }
 

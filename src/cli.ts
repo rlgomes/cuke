@@ -41,6 +41,7 @@ program
     'keep the browser running after scenario completes',
     false
   )
+  .option('--fail-fast', 'stop running tests after the first failure', false)
   .description('run a feature file or directory of features')
   .action(async (paths: string[], options: any) => {
     await cucumber(paths, options).catch((error) => {
