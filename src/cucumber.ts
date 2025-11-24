@@ -132,7 +132,7 @@ async function cucumber (paths: string[] = [], options: Options): Promise<void> 
       backtrace: true,
       paths,
       publish: false,
-      failFast: options.failFast || false,
+      failFast: options.failFast ?? false,
       requireModule: ['ts-node/register'],
       require: [
         // load framework steps from here

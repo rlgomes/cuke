@@ -1,6 +1,10 @@
 module.exports = {
+  collectCoverage: true,
+  coverageReporters: ['json'],
+  coverageDirectory: './coverage/jest',
+
   preset: 'ts-jest',
-  testEnvironment: 'node',
+  testEnvironment: 'jsdom',
   roots: ['<rootDir>/tests'],
   testMatch: ['**/*.test.ts'],
   transform: {
@@ -8,15 +12,7 @@ module.exports = {
       useESM: false
     }]
   },
-  extensionsToTreatAsEsm: [],
   transformIgnorePatterns: [
     'node_modules/(?!(jsdom))'
-  ],
-  globals: {
-    'ts-jest': {
-      tsconfig: {
-        module: 'commonjs'
-      }
-    }
-  }
+  ]
 }

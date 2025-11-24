@@ -80,7 +80,7 @@ export class CukeWorld extends World {
         `${JQUERY_JS};
         ${FUZZY_JS};
         return window.fuzzy.apply(this, arguments);`,
-        name, tags, attributes, direction, filterBy
+        name, tags, attributes, { direction, filterBy }
     )
 
     let element: WebElement = (result as WebElement[])[index]
@@ -98,7 +98,7 @@ export class CukeWorld extends World {
             `${JQUERY_JS};
             ${FUZZY_JS};
             return window.fuzzy.apply(this, arguments);`,
-            name, tags, attributes, direction, filterBy
+            name, tags, attributes, { direction, filterBy }
         )
 
         element = (result as WebElement[])[index]
@@ -133,7 +133,7 @@ export class CukeWorld extends World {
     const originalHandle = await this.driver.getWindowHandle()
 
     // Open a new tab using JavaScript
-    await this.driver.executeScript('window.open(arguments[0] || "", "_blank")', url || '')
+    await this.driver.executeScript('window.open(arguments[0] || "", "_blank")', url ?? '')
 
     // Get all window handles
     const handles = await this.driver.getAllWindowHandles()
@@ -153,21 +153,6 @@ export class CukeWorld extends World {
       await this.driver.get(url)
       await this.waitForPageToLoad()
     }
-  }
-
-  async switchToTab (index: number): Promise<void> {
-    if (this.driver === undefined) {
-      throw new Error('no current browser open')
-    }
-
-    const handles = await this.driver.getAllWindowHandles()
-
-    if (index < 0 || index >= handles.length) {
-      throw new Error(`tab index ${index} is out of range. There are ${handles.length} tabs available.`)
-    }
-
-    await this.driver.switchTo().window(handles[index])
-    await this.waitForPageToLoad()
   }
 
   async switchToNextTab (): Promise<void> {
@@ -199,7 +184,7 @@ export class CukeWorld extends World {
       throw new Error('no current browser open')
     }
 
-    const handles = await this.driver.getAllWindowHandles()
+    const handles: string[] = await this.driver.getAllWindowHandles()
 
     if (handles.length < 2) {
       throw new Error('cannot switch tabs: only one tab is open')
@@ -497,7 +482,7 @@ export class CukeWorld extends World {
         backoff: 'FIXED',
         retries: 'INFINITELY',
         // default to wait for 20s
-        timeout: options?.timeout ?? 20000,
+        timeout: options?.timeout ?? parseInt(process.env.CUKE_WAIT_FOR_TIMEOUT_MS ?? '20000'),
         delay: options?.delay ?? 250,
         retryIf: (error: Error): boolean => {
           lastError = error
