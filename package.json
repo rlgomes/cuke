@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "",
   "scripts": {
-    "build": "tsc --build && npm run copy-js && chmod +x dist/cli.js",
+    "build": "tsc --build && chmod +x dist/cli.js",
     "clean": "tsc --build --clean && rm -fr dist && rm -fr coverage",
     "lint": "eslint --ext .js,.ts src",
     "release": "npm run build && npm pack --pack-destination=./dist",
@@ -20,8 +20,7 @@
     "coverage": "npm run coverage:cuke && npm run coverage:unit",
     "postcoverage": "nyc merge coverage coverage/coverage-final.json && nyc report --check-coverage --temp-dir coverage --reporter=text --reporter=html",
  
-    "watch": "tsc -w",
-    "copy-js": "mkdir -p ./dist/external/js && cp -fr node_modules/jquery/dist/jquery.slim.min.js ./dist/external/js"
+    "watch": "tsc -w"
   },
   "nyc": {
     "all": true,
