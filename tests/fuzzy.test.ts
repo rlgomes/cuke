@@ -5,7 +5,9 @@ import { join } from 'path'
 require('../src/fuzzy')
 
 // Load jQuery from node_modules
-const JQUERY_JS = readFileSync(join(__dirname, '..', 'dist', 'external', 'js', 'jquery.slim.min.js'), 'utf-8')
+const JQUERY_JS = readFileSync(
+  join(__dirname, '..', 'node_modules', 'jquery', 'dist', 'jquery.slim.min.js'),
+  'utf-8')
 
 describe('fuzzy', () => {
   beforeEach(() => {
@@ -38,7 +40,7 @@ describe('fuzzy', () => {
       expect(fuzzy('click you', ['button'], []).length).toBe(0)
     })
 
-    it('should find element with text content that is equal', () => {
+    it('should find element with that is equal', () => {
       document.body.innerHTML = `
         <button>click me</button>
         <div>click me</div>
@@ -50,7 +52,7 @@ describe('fuzzy', () => {
       expect(button.textContent).toBe('click me')
     })
 
-    it('should find element with text content that contains', () => {
+    it('should find element with that contains', () => {
       document.body.innerHTML = `
         <button>click me, please</button>
         <div>click me</div>
@@ -60,6 +62,54 @@ describe('fuzzy', () => {
       const [ button ] = fuzzy('please', ['button'], [])
       expect(button.tagName.toLowerCase()).toBe('button')
       expect(button.textContent).toBe('click me, please')
+    })
+
+    it('should find element with attribute that is equal', () => {
+      document.body.innerHTML = `
+        <button aria-label="click me, please">itsa me mario</button>
+        <div>click me</div>
+        <button>don't click me</button>
+      `
+
+      const [ button ] = fuzzy('click me, please', ['button'], ['aria-label'])
+      expect(button.tagName.toLowerCase()).toBe('button')
+      expect(button.textContent).toBe('itsa me mario')
+    })
+
+    it('should find element with data-* attribute that is equal', () => {
+      document.body.innerHTML = `
+        <button data-aria-label="click me, please">itsa me mario</button>
+        <div>click me</div>
+        <button>don't click me</button>
+      `
+
+      const [ button ] = fuzzy('click me, please', ['button'], ['aria-label'])
+      expect(button.tagName.toLowerCase()).toBe('button')
+      expect(button.textContent).toBe('itsa me mario')
+    })
+
+    it('should find element with attribute that contains', () => {
+      document.body.innerHTML = `
+        <button aria-label="click me, please">itsa me mario</button>
+        <div>click me</div>
+        <button>don't click me</button>
+      `
+
+      const [ button ] = fuzzy('please', ['button'], ['aria-label'])
+      expect(button.tagName.toLowerCase()).toBe('button')
+      expect(button.textContent).toBe('itsa me mario')
+    })
+
+    it('should find element with data-* attribute that contains', () => {
+      document.body.innerHTML = `
+        <button data-aria-label="click me, please">itsa me mario</button>
+        <div>click me</div>
+        <button>don't click me</button>
+      `
+
+      const [ button ] = fuzzy('please', ['button'], ['aria-label'])
+      expect(button.tagName.toLowerCase()).toBe('button')
+      expect(button.textContent).toBe('itsa me mario')
     })
 
     it('should find element with attribute value that is equal', () => {
@@ -103,7 +153,7 @@ describe('fuzzy', () => {
       expect(checkbox.id).toBe('dacheckbox')
     })
 
-    it('should find element with with sibling element with text content that is equal', () => {
+    it('should find element with with sibling element with that is equal', () => {
       document.body.innerHTML = `
         <label>da checkbox</label><input type="checkbox" id="you found me"></input>
       `
@@ -113,7 +163,7 @@ describe('fuzzy', () => {
       expect(checkbox.id).toBe('you found me')
     })
 
-    it('should find element with with sibling element with text content that contains', () => {
+    it('should find element with with sibling element with that contains', () => {
       document.body.innerHTML = `
         <label>da checkbox</label><input type="checkbox" id="you found me"></input>
       `
@@ -123,7 +173,7 @@ describe('fuzzy', () => {
       expect(checkbox.id).toBe('you found me')
     })
 
-    it('should find element with with descendant element with text content that is equal', () => {
+    it('should find element with with descendant element with that is equal', () => {
       document.body.innerHTML = `
         <label>da checkbox<div><input type="checkbox" id="you found me"></input></div></label>
       `
@@ -133,17 +183,105 @@ describe('fuzzy', () => {
       expect(checkbox.id).toBe('you found me')
     })
 
-    it('should find element with with descendant element with text content that contains', () => {
+    it('should find element with with descendant element with that contains', () => {
       document.body.innerHTML = `
-        <label>da checkbox that booms
-          <div>
-            <input type="checkbox" id="you found me"></input>
-          </div>
-        </label>
+        <label>da checkbox that booms<div><input type="checkbox" id="you found me"></input></div></label>
       `
 
       const [ checkbox ] = fuzzy('da check', ['input[type=checkbox]'], [])
       expect(checkbox.tagName.toLowerCase()).toBe('input')
+      expect(checkbox.id).toBe('you found me')
+    })
+
+    it('should find element with sibling element with attribute that is equal', () => {
+      document.body.innerHTML = `
+        <input type="checkbox" id="you found me"></input>
+        <label aria-label="da checkbox"></label>
+      `
+
+      const [ checkbox ] = fuzzy('da checkbox', ['[type=checkbox]'], ['aria-label'])
+      expect(checkbox.tagName.toLowerCase()).toBe('input')
+      expect(checkbox.id).toBe('you found me')
+    })
+
+    it('should find element with sibling element with data-* attribute that is equal', () => {
+      document.body.innerHTML = `
+        <input type="checkbox" id="you found me"></input>
+        <label data-aria-label="da checkbox"></label>
+      `
+
+      const [ checkbox ] = fuzzy('da checkbox', ['[type=checkbox]'], ['aria-label'])
+      expect(checkbox.tagName.toLowerCase()).toBe('input')
+      expect(checkbox.id).toBe('you found me')
+    })
+
+    it('should find element with sibling element with attribute that contains', () => {
+      document.body.innerHTML = `
+        <input type="checkbox" id="you found me"></input>
+        <label aria-label="da checkbox"></label>
+      `
+
+      const [ checkbox ] = fuzzy('da check', ['[type=checkbox]'], ['aria-label'])
+      expect(checkbox.tagName.toLowerCase()).toBe('input')
+      expect(checkbox.id).toBe('you found me')
+    })
+
+    it('should find element with sibling element with data-* attribute that contains', () => {
+      document.body.innerHTML = `
+        <input type="checkbox" id="you found me"></input>
+        <label data-aria-label="da checkbox"></label>
+      `
+
+      const [ checkbox ] = fuzzy('da check', ['[type=checkbox]'], ['aria-label'])
+      expect(checkbox.tagName.toLowerCase()).toBe('input')
+      expect(checkbox.id).toBe('you found me')
+    })
+
+    it('should find element with descendnat element with attribute that is equal', () => {
+      document.body.innerHTML = `
+        <div role="button" id="you found me">
+          <label aria-label="da button"><label>
+        </div>
+      `
+
+      const [ checkbox ] = fuzzy('da button', ['[role=button]'], ['aria-label'])
+      expect(checkbox.tagName.toLowerCase()).toBe('div')
+      expect(checkbox.id).toBe('you found me')
+    })
+
+    it('should find element with descendnat element with data- attribute that is equal', () => {
+      document.body.innerHTML = `
+        <div role="button" id="you found me">
+          <label data-aria-label="da button"><label>
+        </div>
+      `
+
+      const [ checkbox ] = fuzzy('da button', ['[role=button]'], ['aria-label'])
+      expect(checkbox.tagName.toLowerCase()).toBe('div')
+      expect(checkbox.id).toBe('you found me')
+    })
+
+    it('should find element with descendnat element with attribute that contains', () => {
+      document.body.innerHTML = `
+        <div role="button" id="you found me">
+          <label aria-label="da button"><label>
+        </div>
+      `
+
+      const [ checkbox ] = fuzzy('da but', ['[role=button]'], ['aria-label'])
+      expect(checkbox.tagName.toLowerCase()).toBe('div')
+      expect(checkbox.id).toBe('you found me')
+    })
+
+    it('should find element with descendnat element with data- attribute that contains', () => {
+      document.body.innerHTML = `
+        <div role="button" id="you found me">
+          <label data-aria-label="da button"><label>
+        </div>
+      `
+
+      const [ checkbox ] = fuzzy('da bu', ['[role=button]'], ['aria-label'])
+      expect(checkbox.tagName.toLowerCase()).toBe('div')
       expect(checkbox.id).toBe('you found me')
     })
 

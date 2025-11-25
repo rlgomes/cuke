@@ -39,23 +39,24 @@
     for (let tIndex = 0; tIndex < tags.length; tIndex++) {
       const results = $(`${tags[tIndex]}${filterBy}:${matcher}("${name}")`, root).toArray()
       elements = elements.concat(results)
-      console.debug(`${tags[tIndex]}${filterBy}:${matcher}("${name}") found: `, results)
     }
 
     // <tag attribute=name></tag>
     for (let tIndex = 0; tIndex < tags.length; tIndex++) {
       // attribute equals
       for (let aIndex = 0; aIndex < attributes.length; aIndex++) {
-        const results = $(`${tags[tIndex]}[${attributes[aIndex]}='${name}']${filterBy}`, root).toArray()
-        elements = elements.concat(results)
-        console.debug(`${tags[tIndex]}[${attributes[aIndex]}='${name}']${filterBy} found: `, results)
+        elements = [...elements, ...$(`${tags[tIndex]}[${attributes[aIndex]}='${name}']${filterBy}`, root)]
+
+        // https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/data-*
+        elements = [...elements, ...$(`${tags[tIndex]}[data-${attributes[aIndex]}='${name}']${filterBy}`, root)]
       }
 
       // attribute contains
       for (let aIndex = 0; aIndex < attributes.length; aIndex++) {
-        const results = $(`${tags[tIndex]}[${attributes[aIndex]}*='${name}']${filterBy}`, root).toArray()
-        elements = elements.concat(results)
-        console.debug(`${tags[tIndex]}[${attributes[aIndex]}*='${name}']${filterBy} found`, results)
+        elements = [...elements, ...$(`${tags[tIndex]}[${attributes[aIndex]}*='${name}']${filterBy}`, root)]
+
+        // https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/data-*
+        elements = [...elements, ...$(`${tags[tIndex]}[data-${attributes[aIndex]}*='${name}']${filterBy}`, root)]
       }
     }
 
@@ -64,38 +65,68 @@
     for (let tIndex = 0; tIndex < tags.length; tIndex++) {
       const forElements = $(`label${filterBy}:${matcher}("${name}")[for]`, root).toArray()
       forElements.forEach((element) => {
-        const found = $(`${tags[tIndex]}[id=${element.getAttribute('for') ?? ''}]${filterBy}`).toArray()
-        if (found[0] != null) {
-          elements.push(found[0])
-        }
+        elements = [...elements, ...$(`${tags[tIndex]}[id=${element.getAttribute('for') ?? ''}]${filterBy}`)]
       })
     }
 
-    // sibling matches
+    // sibling has value
     for (let tIndex = 0; tIndex < tags.length; tIndex++) {
-      // <*>name</*><tag/>
-      elements = elements.concat($(`*${filterBy}:${matcher}("${name}")`, root).next(`${tags[tIndex]}${filterBy}`).toArray())
+      // <*>name</*> <tag/>
+      elements = [...elements, ...$(`*${filterBy}:${matcher}("${name}")`, root).next(`${tags[tIndex]}${filterBy}`)]
 
-      // common design is the target element is invisible and the labelling element is the one you interact with
-      elements = elements.concat($(`${tags[tIndex]}`, root).prev(`*${filterBy}:${matcher}("${name}")`).toArray())
+      // <tag/> <* attribute=name> </*>
+      for (let tIndex = 0; tIndex < tags.length; tIndex++) {
+        // attribute equals
+        for (let aIndex = 0; aIndex < attributes.length; aIndex++) {
+          elements = [...elements, ...$(`*[${attributes[aIndex]}='${name}']${filterBy}`, root).prev(`${tags[tIndex]}${filterBy}`)]
+
+          // https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/data-*
+          elements = [...elements, ...$(`*[data-${attributes[aIndex]}='${name}']${filterBy}`, root).prev(`${tags[tIndex]}${filterBy}`)]
+
+          elements = [...elements, ...$(`*[${attributes[aIndex]}*='${name}']${filterBy}`, root).prev(`${tags[tIndex]}${filterBy}`)]
+
+          // https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/data-*
+          elements = [...elements, ...$(`*[data-${attributes[aIndex]}*='${name}']${filterBy}`, root).prev(`${tags[tIndex]}${filterBy}`)]
+        }
+      }
+    }
+
+    // descendant has value
+    for (let tIndex = 0; tIndex < tags.length; tIndex++) {
+      // <*>name<tag/></*>
+      elements = [...elements, ...$(`*${filterBy}:${matcher}("${name}") ${tags[tIndex]}${filterBy}`, root)]
+
+      // <tag/> <* attribute=name> </*>
+      for (let tIndex = 0; tIndex < tags.length; tIndex++) {
+        // attribute equals
+        for (let aIndex = 0; aIndex < attributes.length; aIndex++) {
+          elements = [...elements, ...$(`*[${attributes[aIndex]}='${name}']${filterBy}`, root).parents(`${tags[tIndex]}${filterBy}`)]
+
+          // https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/data-*
+          elements = [...elements, ...$(`*[data-${attributes[aIndex]}='${name}']${filterBy}`, root).parents(`${tags[tIndex]}${filterBy}`)]
+
+          elements = [...elements, ...$(`*[${attributes[aIndex]}*='${name}']${filterBy}`, root).parents(`${tags[tIndex]}${filterBy}`)]
+
+          // https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/data-*
+          elements = [...elements, ...$(`*[data-${attributes[aIndex]}*='${name}']${filterBy}`, root).parents(`${tags[tIndex]}${filterBy}`)]
+        }
+      }
     }
 
     // label with descendant matches
     for (let tIndex = 0; tIndex < tags.length; tIndex++) {
-      // <label>name<tag/></label>
-      elements = elements.concat($(`label${filterBy}:${matcher}("${name}") ${tags[tIndex]}${filterBy}`, root).toArray())
-
       // common design is the target element is invisible and the labelling element is the one you interact with
-      elements = elements.concat($(`${tags[tIndex]}`, root).parents(`label${filterBy}:${matcher}("${name}")`).toArray())
+      // <label>name<tag/></label>
+      elements = [...elements, ...$(`${tags[tIndex]}`, root).parents(`label${filterBy}:${matcher}("${name}")`)]
     }
 
     for (let tIndex = 0; tIndex < tags.length; tIndex++) {
       if (direction === 'l2r') {
         // <*>name</*>...<tag></tag>
-        elements = elements.concat($(`*${filterBy}:${matcher}('${name}')`, root).nextAll(`${tags[tIndex]}${filterBy}`).toArray())
+        elements = [...elements, ...$(`*${filterBy}:${matcher}('${name}')`, root).nextAll(`${tags[tIndex]}${filterBy}`)]
       } else if (direction === 'r2l') {
         // <taG></tag>...<*>name</*>
-        elements = elements.concat($(`*${filterBy}:${matcher}('${name}')`, root).prevAll(`${tags[tIndex]}${filterBy}`).toArray())
+        elements = [...elements, ...$(`*${filterBy}:${matcher}('${name}')`, root).prevAll(`${tags[tIndex]}${filterBy}`)]
       }
     }
   }

@@ -9,7 +9,9 @@ import { retry } from 'ts-retry-promise'
 
 import 'chromedriver'
 
-const JQUERY_JS = readFileSync(join(__dirname, '..', 'external', 'js', 'jquery.slim.min.js'), 'utf-8')
+const JQUERY_JS = readFileSync(
+  join(__dirname, '..', '..', 'node_modules', 'jquery', 'dist', 'jquery.slim.min.js'),
+  'utf-8')
 const FUZZY_JS = readFileSync(join(__dirname, '..', 'fuzzy.js'), 'utf-8')
 
 export class CukeWorld extends World {
@@ -375,12 +377,15 @@ export class CukeWorld extends World {
 
   async clearElement (element: WebElement): Promise<void> {
     const value = await element.getAttribute('value')
-    // convert each character in the element into a backspace (like a user would)
-    value.split('').forEach(() => {
-      element.sendKeys(Key.BACK_SPACE).catch((err) => {
-        throw err
+
+    if (value != null) {
+      // convert each character in the element into a backspace (like a user would)
+      value.split('').forEach(() => {
+        element.sendKeys(Key.BACK_SPACE).catch((err) => {
+          throw err
+        })
       })
-    })
+    }
   }
 
   async writeIntoInput (name: string, value: string): Promise<void> {
