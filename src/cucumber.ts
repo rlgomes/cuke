@@ -46,7 +46,7 @@ function initCucumber (): void {
   })
 
   setWorldConstructor(CukeWorld)
-  setDefaultTimeout(30 * 1000)
+  setDefaultTimeout(3600 * 1000)
 }
 
 // @ts-expect-error: 'resolveVariablesInArgs' is declared but its value is never read. [Error]

@@ -14,7 +14,7 @@ const JQUERY_JS = readFileSync(
   'utf-8')
 const FUZZY_JS = readFileSync(join(__dirname, '..', 'fuzzy.js'), 'utf-8')
 
-export class CukeWorld extends World {
+class CukeWorld extends World {
   driver: any = undefined
   debug = Debug('cuke')
 
@@ -131,26 +131,17 @@ export class CukeWorld extends World {
       throw new Error('no current browser open')
     }
 
-    // Store the current window handle
     const originalHandle = await this.driver.getWindowHandle()
-
-    // Open a new tab using JavaScript
     await this.driver.executeScript('window.open(arguments[0] || "", "_blank")', url ?? '')
-
-    // Get all window handles
     const handles = await this.driver.getAllWindowHandles()
-
-    // Find the new handle (it should be different from the original)
     const newHandle = handles.find((handle: string) => handle !== originalHandle)
 
     if (newHandle === undefined) {
       throw new Error('failed to open new tab')
     }
 
-    // Switch to the new tab
     await this.driver.switchTo().window(newHandle)
 
-    // If a URL was provided, navigate to it
     if (url !== undefined && url !== '') {
       await this.driver.get(url)
       await this.waitForPageToLoad()
@@ -329,27 +320,26 @@ export class CukeWorld extends World {
     await checkbox.click()
   }
 
+  switchExpressions: string[] = [
+    'input[type=checkbox]',
+    '*[role=checkbox]',
+    '*[role=switch]'
+  ]
+
+  switchAttributes: string[] = [
+    'aria-label',
+    'title'
+  ]
+
   async findSwitch (name: string): Promise<WebElement> {
     // priority for switches labelled left to right (l2r)
-    const result = await this.fuzzyFind(
-      name,
-      ['input[type=checkbox]', '*[role=checkbox]', '*[role=switch]'],
-      ['aria-label', 'title'],
-      0,
-      'r2l'
-    )
+    const result = await this.fuzzyFind(name, this.switchExpressions, this.switchAttributes, 0, 'r2l')
 
     if (result !== undefined) {
       return result
     }
 
-    return await this.fuzzyFind(
-      name,
-      ['input[type=checkbox]', '*[role=checkbox]', '*[role=switch]'],
-      ['aria-label', 'title'],
-      0,
-      'l2r'
-    )
+    return await this.fuzzyFind(name, this.switchExpressions, this.switchAttributes, 0, 'l2r')
   }
 
   inputExpressions: string[] = [
@@ -395,6 +385,7 @@ export class CukeWorld extends World {
     }
 
     await this.clearElement(input)
+    value = value.replaceAll('\n', '')
     await input.sendKeys(value)
   }
 
@@ -407,24 +398,15 @@ export class CukeWorld extends World {
     await this.driver.actions().move({ origin: text }).perform()
   }
 
+  dropdownExpressions: string[] = ['select', '*[role=combobox]']
+  dropdownAttributes: string[] = ['aria-label', 'title']
+
   async findDropdown (name: string): Promise<WebElement> {
-    return await this.fuzzyFind(
-      name,
-      ['select', '*[role=combobox]'],
-      ['aria-label', 'title'],
-      0
-    )
+    return await this.fuzzyFind(name, this.dropdownExpressions, this.dropdownAttributes, 0)
   }
 
   async findDropdownOption (name: string): Promise<WebElement> {
-    return await this.fuzzyFind(
-      name,
-      ['option', '*[role=option]'],
-      ['aria-label', 'title'],
-      0,
-      'l2r',
-      false
-    )
+    return await this.fuzzyFind(name, this.dropdownExpressions, this.dropdownAttributes, 0, 'l2r', false)
   }
 
   async selectOptionInDropdown (
@@ -488,7 +470,7 @@ export class CukeWorld extends World {
         retries: 'INFINITELY',
         // default to wait for 20s
         timeout: options?.timeout ?? parseInt(process.env.CUKE_WAIT_FOR_TIMEOUT_MS ?? '20000'),
-        delay: options?.delay ?? 250,
+        delay: options?.delay ?? 500,
         retryIf: (error: Error): boolean => {
           lastError = error
           return true
@@ -504,4 +486,4 @@ export class CukeWorld extends World {
   }
 }
 
-export { WebElement }
+export { CukeWorld, WebElement }
