@@ -1,5 +1,7 @@
 # cuke
 
+[![CI](https://github.com/rlgomes/cuke/actions/workflows/ci.yml/badge.svg)](https://github.com/rlgomes/cuke/actions/workflows/ci.yml)
+
 e2e testing framework built on cucumber that uses fuzzy matching to simplify and
 harden the writing of web UI related tests.
 
