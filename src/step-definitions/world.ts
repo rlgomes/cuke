@@ -79,10 +79,10 @@ class CukeWorld extends World {
 
     await this.driver.switchTo().defaultContent()
     let result = await this.driver.executeScript(
-        `${JQUERY_JS};
+      `${JQUERY_JS};
         ${FUZZY_JS};
         return window.fuzzy.apply(this, arguments);`,
-        name, tags, attributes, { direction, filterBy }
+      name, tags, attributes, { direction, filterBy }
     )
 
     let element: WebElement = (result as WebElement[])[index]
@@ -97,10 +97,10 @@ class CukeWorld extends World {
         await this.driver.switchTo().frame(frame)
 
         result = await this.driver.executeScript(
-            `${JQUERY_JS};
+          `${JQUERY_JS};
             ${FUZZY_JS};
             return window.fuzzy.apply(this, arguments);`,
-            name, tags, attributes, { direction, filterBy }
+          name, tags, attributes, { direction, filterBy }
         )
 
         element = (result as WebElement[])[index]
@@ -235,7 +235,7 @@ class CukeWorld extends World {
     this.buttonExpressions.push(expression)
   }
 
-  buttonAttributes: string [] = [
+  buttonAttributes: string[] = [
     'aria-label',
     'title',
     'placeholder'
@@ -396,6 +396,12 @@ class CukeWorld extends World {
   async hoverOverText (value: string): Promise<void> {
     const text = await this.findText(value)
     await this.driver.actions().move({ origin: text }).perform()
+  }
+
+  headerExpressions: string[] = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']
+
+  async findHeader (name: string): Promise<WebElement> {
+    return await this.fuzzyFind(name, this.headerExpressions, [])
   }
 
   dropdownExpressions: string[] = ['select', '*[role=combobox]']

@@ -11,15 +11,17 @@
     "test:cuke": "cuke run features",
     "test:unit": "jest",
     "test": "npm run test:cuke && npm run test:unit",
-   
+
     "coverage:cuke": "nyc --reporter=json --report-dir=coverage/cuke dist/cli.js run features",
     "postcoverage:cuke": "cp coverage/cuke/coverage-final.json coverage/cuke-final.json",
+
     "coverage:unit": "jest --coverage",
     "postcoverage:unit": "cp coverage/jest/coverage-final.json coverage/jest-final.json",
 
+    "precoverage": "rm -fr coverage",
     "coverage": "npm run coverage:cuke && npm run coverage:unit",
     "postcoverage": "nyc merge coverage coverage/coverage-final.json && nyc report --check-coverage --temp-dir coverage --reporter=text --reporter=html",
- 
+
     "watch": "tsc -w"
   },
   "nyc": {
