@@ -4,4 +4,13 @@ export { After, AfterAll, Before, BeforeAll } from '@cucumber/cucumber'
 export { Step } from './cucumber'
 export { CukeWorld, WebElement } from './step-definitions/world'
 
+export {
+  defineActionSteps,
+  defineVisibilitySteps,
+  defineInStateSteps,
+
+  defineElementValueSteps,
+  defineNamedElementValueSteps
+} from './step-definitions/utils.steps'
+
 process.env = new Config()

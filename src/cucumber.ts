@@ -99,6 +99,21 @@ function Step (pattern: string | RegExp, options: any, code?: any): void {
   eval(evalString)
 }
 
+function loadRequires (): string[] {
+  return [
+    // load framework steps from here
+    join(__dirname, 'step-definitions/**/*.js'),
+    join(__dirname, 'step-definitions/*.js'),
+
+    // load custom local steps from a step-definitions directory
+    // and handle .js or .ts files
+    join(cwd(), 'features/step-definitions/**/*.ts'),
+    join(cwd(), 'features/step-definitions/*.ts'),
+    join(cwd(), 'features/step-definitions/**/*.js'),
+    join(cwd(), 'features/step-definitions/*.js')
+  ]
+}
+
 async function cucumber (paths: string[] = [], options: Options): Promise<void> {
   debug('cucumber', paths, options)
   process.env.OUTPUT_DIR = options.output
@@ -134,18 +149,7 @@ async function cucumber (paths: string[] = [], options: Options): Promise<void> 
       publish: false,
       failFast: options.failFast ?? false,
       requireModule: ['ts-node/register'],
-      require: [
-        // load framework steps from here
-        join(__dirname, 'step-definitions/**/*.js'),
-        join(__dirname, 'step-definitions/*.js'),
-
-        // load custom local steps from a step-definitions directory
-        // and handle .js or .ts files
-        join(cwd(), 'features/step-definitions/**/*.ts'),
-        join(cwd(), 'features/step-definitions/*.ts'),
-        join(cwd(), 'features/step-definitions/**/*.js'),
-        join(cwd(), 'features/step-definitions/*.js')
-      ],
+      require: loadRequires(),
       formatOptions: {
         colorsEnabled: true,
         theme: {
@@ -182,14 +186,7 @@ async function steps (path: string, options: Options): Promise<void> {
       publish: false,
       dryRun: true,
       requireModule: ['ts-node/register'],
-      require: [
-        // load framework steps from here
-        join(__dirname, 'step-definitions/**/*.js'),
-        // load custom local steps from a step-definitions directory
-        // and handle .js or .ts files
-        join(cwd(), 'step-definitions/**/*.ts'),
-        join(cwd(), 'step-definitions/**/*.js')
-      ]
+      require: loadRequires()
     }
   }
 
