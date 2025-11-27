@@ -121,11 +121,6 @@ class CukeWorld extends World {
     return this.driver.getCurrentUrl()
   }
 
-  async getTabCount (): Promise<number> {
-    const handles = await this.driver.getAllWindowHandles()
-    return handles.length
-  }
-
   async openNewTab (url?: string): Promise<void> {
     if (this.driver === undefined) {
       throw new Error('no current browser open')
@@ -253,16 +248,6 @@ class CukeWorld extends World {
     await this.driver.executeScript('arguments[0].scrollIntoView(true)', element)
     await element.click()
     await this.waitForPageToLoad()
-  }
-
-  async clickButton (name: string): Promise<void> {
-    const button = await this.findButton(name)
-
-    if (button === undefined) {
-      throw new Error(`unable to find button '${name}'`)
-    }
-
-    await this.clickElement(button)
   }
 
   async hoverOverButton (name: string): Promise<void> {
