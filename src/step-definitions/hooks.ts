@@ -7,10 +7,10 @@ import {
 } from '@cucumber/cucumber'
 import * as captureConsole from 'capture-console'
 import { dirname } from 'path'
+import { initCucumber } from '../cucumber'
 import { logging } from 'selenium-webdriver'
 import { v4 as uuidv4 } from 'uuid'
 import { loadEnvs } from '../envs'
-import { initCucumber } from '../cucumber'
 
 initCucumber()
 

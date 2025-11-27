@@ -26,7 +26,12 @@
   },
   "nyc": {
     "all": true,
-    "lines": 85
+    "exclude": [
+        "dist/external/**/*.js",
+        ".eslintrc.js",
+        "jest.config.js"
+    ],
+    "lines": 90
   },
   "main": "dist/index.js",
   "bin": {
