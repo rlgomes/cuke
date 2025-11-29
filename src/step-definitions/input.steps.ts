@@ -12,6 +12,14 @@ Step('I write "{arg}" into the input "{arg}"',
   }
 )
 
+Step('I send the key "{arg}" to the input "{arg}"',
+  async function (this: CukeWorld, key: string, name: string) {
+    await this.waitFor(async () => {
+      await this.sendKeyToInput(name, key)
+    })
+  }
+)
+
 Step('I write "{arg}" into the input "{arg}" waiting up to "{seconds}" seconds',
   async function (this: CukeWorld, value: string, name: string, seconds: string) {
     await this.waitFor(async () => {
