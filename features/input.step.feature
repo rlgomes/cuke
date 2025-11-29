@@ -63,4 +63,9 @@ Feature: Input steps
     Given I open a browser at "file:///${PWD}/data/inputs.html"
      Then I should see the input "input that changes value" is equal to "changed" waiting up to "5" seconds
 
+  Scenario: User can send a key to an input
+    Given I open a browser at "file:///${PWD}/data/inputs.html"
+     When I send the key "Enter" to the input "input for enter key"
+     Then I should see the input "input for enter key" is equal to "entered"
+
 

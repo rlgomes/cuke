@@ -374,6 +374,22 @@ class CukeWorld extends World {
     await input.sendKeys(value)
   }
 
+  async sendKeyToInput (name: string, key: string): Promise<void> {
+    const input = await this.findInput(name)
+    if (input == null) {
+      throw Error(`unable to find input "${name}"`)
+    }
+
+    const keyName = key.toUpperCase()
+    const keyToSend = Key[keyName as keyof typeof Key]
+
+    if (typeof keyToSend !== 'string') {
+      throw Error(`unknown key "${key}"`)
+    }
+
+    await input.sendKeys(keyToSend)
+  }
+
   async findText (value: string): Promise<WebElement> {
     return await this.fuzzyFind(value, ['*'], [])
   }
