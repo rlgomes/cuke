@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Expandable Items</title>
+</head>
+<body>
+    <h1>Expandable Items Test</h1>
+
+    <!-- Native details/summary -->
+    <details>
+        <summary>Native Details</summary>
+        <p>This is the content of the native details element.</p>
+    </details>
+
+    <!-- ARIA button expandable -->
+    <button id="aria-btn" aria-expanded="false" aria-controls="aria-content" onclick="toggleAria()">ARIA Button</button>
+    <div id="aria-content" hidden>
+        <p>This is the content of the ARIA expandable element.</p>
+    </div>
+
+    <script>
+        function toggleAria() {
+            const btn = document.getElementById('aria-btn');
+            const content = document.getElementById('aria-content');
+            const isExpanded = btn.getAttribute('aria-expanded') === 'true';
+            
+            btn.setAttribute('aria-expanded', !isExpanded);
+            content.hidden = isExpanded;
+        }
+    </script>
+</body>
+</html>

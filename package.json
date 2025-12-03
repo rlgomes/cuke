@@ -7,29 +7,24 @@
     "clean": "tsc --build --clean && rm -fr dist && rm -fr coverage",
     "lint": "eslint --ext .js,.ts src",
     "release": "npm run build && npm pack --pack-destination=./dist",
-
     "test:cuke": "cuke run features",
     "test:unit": "jest",
     "test": "npm run test:cuke && npm run test:unit",
-
     "coverage:cuke": "nyc --reporter=json --report-dir=coverage/cuke dist/cli.js run features",
     "postcoverage:cuke": "cp coverage/cuke/coverage-final.json coverage/cuke-final.json",
-
     "coverage:unit": "jest --coverage",
     "postcoverage:unit": "cp coverage/jest/coverage-final.json coverage/jest-final.json",
-
     "precoverage": "rm -fr coverage",
     "coverage": "npm run coverage:cuke && npm run coverage:unit",
     "postcoverage": "nyc merge coverage coverage/coverage-final.json && nyc report --check-coverage --temp-dir coverage --reporter=text --reporter=html",
-
     "watch": "tsc -w"
   },
   "nyc": {
     "all": true,
     "exclude": [
-        "dist/external/**/*.js",
-        ".eslintrc.js",
-        "jest.config.js"
+      "dist/external/**/*.js",
+      ".eslintrc.js",
+      "jest.config.js"
     ],
     "lines": 90
   },
@@ -49,7 +44,7 @@
     "@types/jquery": "^3.5.16",
     "@types/luxon": "^3.2.0",
     "@types/memorystream": "^0.3.0",
-    "@types/node": "^18.11.18",
+    "@types/node": "^22.0.0",
     "@types/selenium-webdriver": "^4.1.9",
     "autocannon": "^7.10.0",
     "capture-console": "^1.0.1",

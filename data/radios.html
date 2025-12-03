@@ -1,0 +1,57 @@
+<html>
+
+<head>
+    <title>radios!</title>
+</head>
+
+<body>
+    <input type="radio" name="group1" /><label>radio with next sibling label</label>
+    <br />
+    <label onclick="document.getElementById('radio-wrapped-by-label').click()">
+        <span>
+            <input type="radio" name="group2" />
+        </span>
+        <span>radio wrapped with a label</span>
+    </label>
+    <br />
+    <input type="radio" name="group3" /><b></b>
+    <div><label>radio with next nested sibling label</label></div>
+    <br />
+    <input type="radio" name="group4" /><label>radio with '" in the name</label>
+    <br />
+    <input type="radio" name="group5" id="radio-that-becomes-selected" /><label>radio that becomes selected</label>
+    <br />
+    <br />
+    <input type="radio" name="group6" id="radio-that-becomes-unselected" checked /><label>radio that becomes unselected</label>
+    <br />
+    <input type="radio" name="group6" id="other-radio-in-group6" >other radio button in previous group </input>
+    <br />
+    <br />
+    <input type="radio" name="group7" id="radio-to-select" /><label>radio to select</label>
+    <br />
+    <div id="radio-tail"></div>
+
+    <script>
+        setTimeout(function () {
+            let tail = document.querySelector("#radio-tail");
+            tail.insertAdjacentHTML(
+                "afterend",
+                "<input type=\"radio\" name=\"group8\"><label>radio that appears 2 seconds later</label></input><br/>"
+            );
+
+            // Select the radio that becomes selected
+            var radioToSelect = document.querySelector("#radio-that-becomes-selected");
+            if (radioToSelect) {
+                radioToSelect.checked = true;
+            }
+
+            // Unselect the radio that becomes unselected by selecting another in the same group
+            var otherRadio = document.querySelector("#other-radio-in-group6");
+            if (otherRadio) {
+                otherRadio.click();
+            }
+        }, 2000);
+    </script>
+</body>
+
+</html>

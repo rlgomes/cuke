@@ -44,6 +44,10 @@ function defineActionSteps (
     async function (this: CukeWorld, name: string) {
       await this.waitFor(async () => {
         const element = await findFunction.bind(this)(name)
+        if (element == null) {
+          throw new Error(`unable to find ${elementName} "${name}"`)
+        }
+
         await actionFunction.bind(this)(element)
       })
     })
@@ -52,6 +56,10 @@ function defineActionSteps (
     async function (this: CukeWorld, name: string, seconds: string) {
       await this.waitFor(async () => {
         const element = await findFunction.bind(this)(name)
+        if (element == null) {
+          throw new Error(`unable to find ${elementName} "${name}"`)
+        }
+
         await actionFunction.bind(this)(element)
       },
       {

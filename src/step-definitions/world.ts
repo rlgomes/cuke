@@ -82,7 +82,7 @@ class CukeWorld extends World {
       `${JQUERY_JS};
         ${FUZZY_JS};
         return window.fuzzy.apply(this, arguments);`,
-      name, tags, attributes, { direction, filterBy }
+      name, tags, attributes, { direction, filterBy, index }
     )
 
     let element: WebElement = (result as WebElement[])[index]
@@ -100,7 +100,7 @@ class CukeWorld extends World {
           `${JQUERY_JS};
             ${FUZZY_JS};
             return window.fuzzy.apply(this, arguments);`,
-          name, tags, attributes, { direction, filterBy }
+          name, tags, attributes, { direction, filterBy, index }
         )
 
         element = (result as WebElement[])[index]
@@ -217,13 +217,19 @@ class CukeWorld extends World {
   }
 
   buttonExpressions: string[] = [
-    'a',
     'button',
+    'a',
     'input[type=submit]',
-    '*[role=button]',
     'input[type=radio]',
+
+    '*[role=button]',
+    '*[role=link]',
+    '*[role=checkbox]',
+    '*[role=switch]',
+    '*[role=tab]',
+    '*[role=option]',
     '*[role=menuitem]',
-    '*[role=tab]'
+    '*[role=treeitem]'
   ]
 
   registerButtonCSSExpression (expression: string): void {
@@ -245,7 +251,6 @@ class CukeWorld extends World {
   }
 
   async clickElement (element: WebElement): Promise<void> {
-    await this.driver.executeScript('arguments[0].scrollIntoView(true)', element)
     await element.click()
     await this.waitForPageToLoad()
   }
@@ -279,10 +284,9 @@ class CukeWorld extends World {
   }
 
   async isChecked (element: WebElement): Promise<boolean> {
-    if (await element.getAttribute('checked') != null) {
-      return true
-    }
-    return await element.getAttribute('checked') === 'true'
+    const ariaChecked = await element.getAttribute('aria-checked')
+    const checked = await element.isSelected()
+    return (checked || ariaChecked === 'true')
   }
 
   async isUnchecked (element: WebElement): Promise<boolean> {
@@ -303,6 +307,47 @@ class CukeWorld extends World {
     }
 
     await checkbox.click()
+  }
+
+  radioExpressions: string[] = [
+    'input[type=radio]',
+    '*[role=radio]'
+  ]
+
+  radioAttributes: string[] = [
+    'aria-label',
+    'title'
+  ]
+
+  async findRadio (name: string): Promise<WebElement> {
+    // priority for radios labelled right to left (r2l)
+    const result = await this.fuzzyFind(
+      name,
+      this.radioExpressions,
+      this.radioAttributes,
+      0,
+      'r2l'
+    )
+
+    if (result !== undefined) {
+      return result
+    }
+
+    return await this.fuzzyFind(
+      name,
+      this.radioExpressions,
+      this.radioAttributes,
+      0,
+      'l2r'
+    )
+  }
+
+  async selectRadio (radio: WebElement): Promise<void> {
+    if (await this.isChecked(radio)) {
+      return
+    }
+
+    await radio.click()
   }
 
   switchExpressions: string[] = [
@@ -328,12 +373,23 @@ class CukeWorld extends World {
   }
 
   inputExpressions: string[] = [
+    'input[type=text]',
+    'input[type=password]',
+    'input[type=search]',
     'input',
     'textarea',
     '*[role=textbox]',
     '*[role=searchbox]',
     '*[contenteditable]'
   ]
+
+  registerInputCSSExpression (expression: string, priority: number = -1): void {
+    if (priority === -1) {
+      this.inputExpressions.push(expression)
+    } else {
+      this.inputExpressions.splice(priority, 0, expression)
+    }
+  }
 
   inputAttributes: string[] = [
     'aria-label',
@@ -369,9 +425,9 @@ class CukeWorld extends World {
       throw Error(`unable to find input "${name}"`)
     }
 
-    await this.clearElement(input)
-    value = value.replaceAll('\n', '')
-    await input.sendKeys(value)
+    await this.clickElement(input)
+    const focusedElement = await this.driver.switchTo().activeElement()
+    await focusedElement.sendKeys(value)
   }
 
   async sendKeyToInput (name: string, key: string): Promise<void> {
@@ -380,14 +436,27 @@ class CukeWorld extends World {
       throw Error(`unable to find input "${name}"`)
     }
 
-    const keyName = key.toUpperCase()
-    const keyToSend = Key[keyName as keyof typeof Key]
+    await this.sendKeyToElement(input, key)
+  }
 
-    if (typeof keyToSend !== 'string') {
-      throw Error(`unknown key "${key}"`)
+  async getFocusedElement (): Promise<WebElement> {
+    return this.driver.switchTo().activeElement()
+  }
+
+  async sendKeyToElement (element: WebElement, key: string): Promise<void> {
+    let keyName = key.toUpperCase()
+    let keyToSend
+
+    if (keyName === 'BACKSPACE') { keyName = 'BACK_SPACE' }
+    if (keyName in Key) {
+      keyToSend = Key[keyName as keyof typeof Key]
+    } else {
+      keyToSend = key
     }
 
-    await input.sendKeys(keyToSend)
+    await this.clickElement(element)
+    const focusedElement = await this.driver.switchTo().activeElement()
+    await focusedElement.sendKeys(keyToSend)
   }
 
   async findText (value: string): Promise<WebElement> {
@@ -435,6 +504,37 @@ class CukeWorld extends World {
     }
 
     await this.clickElement(option)
+  }
+
+  expandableExpressions: string[] = [
+    '*[aria-expanded]'
+  ]
+
+  expandableAttributes: string[] = ['aria-label', 'title']
+
+  async findExpandable (name: string): Promise<WebElement> {
+    return await this.fuzzyFind(name, this.expandableExpressions, this.expandableAttributes)
+  }
+
+  async isExpanded (element: WebElement): Promise<boolean> {
+    const ariaExpanded = await element.getAttribute('aria-expanded')
+    return ariaExpanded === 'true'
+  }
+
+  async isClosed (element: WebElement): Promise<boolean> {
+    return !(await this.isExpanded(element))
+  }
+
+  async openExpandable (expandable: WebElement): Promise<void> {
+    if (!(await this.isExpanded(expandable))) {
+      await this.clickElement(expandable)
+    }
+  }
+
+  async closeExpandable (expandable: WebElement): Promise<void> {
+    if (await this.isExpanded(expandable)) {
+      await this.clickElement(expandable)
+    }
   }
 
   async isEnabled (element: WebElement): Promise<boolean> {

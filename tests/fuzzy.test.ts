@@ -27,10 +27,12 @@ describe('fuzzy', () => {
       direction?: string
       filterBy?: string
       root?: Element
+      index?: number
     } = {}
   ) {
     // in jsdom the visibility method doesn't work right
     options.filterBy = ''
+    options.index = 0 // early exit for each match
     return (window as any).fuzzy(name, tags, attributes, options)
   }
 
@@ -175,17 +177,17 @@ describe('fuzzy', () => {
 
     it('should find element with with descendant element with that is equal', () => {
       document.body.innerHTML = `
-        <label>da checkbox<div><input type="checkbox" id="you found me"></input></div></label>
+        <div>da checkbox<div><input type="checkbox" id="you found me"/></div></div>
       `
 
-      const [ checkbox ] = fuzzy('da checkbox', ['input[type=checkbox]'], [])
+      const [ checkbox ] = fuzzy('da checkbox', ['input'], [])
       expect(checkbox.tagName.toLowerCase()).toBe('input')
       expect(checkbox.id).toBe('you found me')
     })
 
     it('should find element with with descendant element with that contains', () => {
       document.body.innerHTML = `
-        <label>da checkbox that booms<div><input type="checkbox" id="you found me"></input></div></label>
+        <div>da checkbox that booms<div><input type="checkbox" id="you found me"></input></div></div>
       `
 
       const [ checkbox ] = fuzzy('da check', ['input[type=checkbox]'], [])
@@ -285,5 +287,23 @@ describe('fuzzy', () => {
       expect(checkbox.id).toBe('you found me')
     })
 
+    it('should find element with ancestor that has text content that is equal', () => {
+      document.body.innerHTML = `
+        <div>
+          <div>
+            <p>find that guy<p>
+          </div>
+          <div>
+            <div>
+              <input id="da right one"></input>
+            </div>
+          </div>
+        </div>
+      `
+
+      const [ checkbox ] = fuzzy('find that guy', ['input'], [])
+      expect(checkbox.tagName.toLowerCase()).toBe('input')
+      expect(checkbox.id).toBe('da right one')
+    })
   })
 })
