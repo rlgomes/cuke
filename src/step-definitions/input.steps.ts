@@ -4,6 +4,8 @@ import {
   defineInStateSteps
 } from './utils.steps'
 
+import { By } from 'selenium-webdriver'
+
 Step('I write "{arg}" into the input "{arg}"',
   async function (this: CukeWorld, value: string, name: string) {
     await this.waitFor(async () => {
@@ -16,6 +18,24 @@ Step('I send the key "{arg}" to the input "{arg}"',
   async function (this: CukeWorld, key: string, name: string) {
     await this.waitFor(async () => {
       await this.sendKeyToInput(name, key)
+    })
+  }
+)
+
+Step('I send the key "{arg}" to the focused element',
+  async function (this: CukeWorld, key: string) {
+    await this.waitFor(async () => {
+      const focused = await this.getFocusedElement()
+      await this.sendKeyToElement(focused, key)
+    })
+  }
+)
+
+Step('I send the key "{arg}" to the page',
+  async function (this: CukeWorld, key: string) {
+    await this.waitFor(async () => {
+      const body = this.driver.findElement(By.tagName('body'))
+      await this.sendKeyToElement(body, key)
     })
   }
 )
