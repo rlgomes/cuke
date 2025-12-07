@@ -1,10 +1,10 @@
-import type { CukeWorld, WebElement } from '../index'
+import type { CukeWorld, BrowserElement } from '../index'
 import { Step } from '../index'
 import {
   defineVisibilitySteps
 } from './utils.steps'
 
-async function findDropdown (this: CukeWorld, name: string): Promise<WebElement> {
+async function findDropdown (this: CukeWorld, name: string): Promise<BrowserElement> {
   return await this.findDropdown(name)
 }
 

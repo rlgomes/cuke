@@ -10,8 +10,13 @@
     "test:cuke": "cuke run features",
     "test:unit": "jest",
     "test": "npm run test:cuke && npm run test:unit",
-    "coverage:cuke": "nyc --reporter=json --report-dir=coverage/cuke dist/cli.js run features",
-    "postcoverage:cuke": "cp coverage/cuke/coverage-final.json coverage/cuke-final.json",
+
+    "coverage:cuke:playwright": "mkdir -p output/playwright && nyc --reporter=json --report-dir=coverage/cuke-playwright dist/cli.js run features --browser-platform playwright --output output/playwright",
+    "coverage:cuke:selenium": "mkdir -p output/selenium && nyc --reporter=json --report-dir=coverage/cuke-selenium dist/cli.js run features --browser-platform selenium --output output/selenium",
+    "coverage:cuke": "npm run coverage:cuke:playwright && npm run coverage:cuke:selenium",
+
+    "postcoverage:cuke": "cp coverage/cuke-playwright/coverage-final.json coverage/cuke-playwright-final.json && cp coverage/cuke-selenium/coverage-final.json coverage/cuke-selenium-final.json",
+
     "coverage:unit": "jest --coverage",
     "postcoverage:unit": "cp coverage/jest/coverage-final.json coverage/jest-final.json",
     "precoverage": "rm -fr coverage",
@@ -61,6 +66,7 @@
     "jquery": "^3.7.1",
     "luxon": "^3.2.1",
     "memorystream": "^0.3.1",
+    "playwright": "^1.57.0",
     "pre-commit": "^1.2.2",
     "selenium-webdriver": "^4.38.0",
     "shlex": "^2.1.2",

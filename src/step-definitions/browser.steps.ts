@@ -14,18 +14,14 @@ Step('I refresh the current page',
 
 Step('I navigate to "{arg}"',
   async function (this: CukeWorld, url: string) {
-    if (this.driver === undefined) {
-      throw new Error('no current browser open')
-    }
-    await this.driver.get(url)
+    await this.browser.open(url)
     await this.waitForPageToLoad()
   })
 
 Step('I close the current browser',
   async function (this: CukeWorld) {
-    if (this.driver !== undefined) {
-      await this.driver.close()
-      this.driver = undefined
+    if (this.browser !== undefined) {
+      await this.browser.quit()
     } else {
       throw new Error('no current browser open')
     }

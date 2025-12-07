@@ -2,7 +2,7 @@ import { Config } from './config'
 
 export { After, AfterAll, Before, BeforeAll } from '@cucumber/cucumber'
 export { Step } from './cucumber'
-export { CukeWorld, WebElement } from './step-definitions/world'
+export { CukeWorld, type BrowserElement } from './step-definitions/world'
 
 export {
   defineActionSteps,

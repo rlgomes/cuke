@@ -8,7 +8,7 @@ import Debug from 'debug'
 // load .env from current working directory
 dotenv.config()
 
-console.debug = process.env.DEBUG !== undefined ? console.debug : () => {}
+console.debug = process.env.DEBUG !== undefined ? console.debug : () => { }
 
 const program = new Command()
 
@@ -34,6 +34,11 @@ program
   .argument('<path...>')
   .option('-e, --env [key=value]', 'define runtime variables', envCollect, [])
   .option('-o, --output <output path>', 'path to store the results at', 'output')
+  .option(
+    '-p, --browser-platform <browser>',
+    'browser platform to use (selenium or playwright)',
+    'playwright'
+  )
   .option('--headless', 'run with the browser in headless mode', true)
   .option('--no-headless', 'run with the browser not in headless mode', false)
   .option(

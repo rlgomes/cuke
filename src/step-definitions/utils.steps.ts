@@ -1,4 +1,4 @@
-import type { CukeWorld, WebElement } from './world'
+import type { CukeWorld, BrowserElement } from '../index'
 import { Step } from '../index'
 
 import {
@@ -28,9 +28,13 @@ defineParameterType({
   useForSnippets: false
 })
 
-type Actioner = (this: CukeWorld, element: WebElement) => Promise<void>
-type Checker = (this: CukeWorld, element: WebElement) => Promise<boolean>
-type Finder = (this: CukeWorld, input: string) => Promise<WebElement>
+export type ElementFinder = (this: CukeWorld, input: string) => Promise<BrowserElement>
+export type ElementAction = (this: CukeWorld, element: BrowserElement) => Promise<void>
+export type ElementChecker = (this: CukeWorld, element: BrowserElement) => Promise<boolean>
+
+type Actioner = ElementAction
+type Checker = ElementChecker
+type Finder = ElementFinder
 type Getter = (this: CukeWorld) => Promise<string>
 type NamedGetter = (this: CukeWorld, name: string) => Promise<string>
 

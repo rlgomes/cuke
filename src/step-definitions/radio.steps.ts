@@ -1,4 +1,4 @@
-import type { CukeWorld, WebElement } from './world'
+import type { CukeWorld, BrowserElement } from '../index'
 
 import {
   defineActionSteps,
@@ -6,20 +6,20 @@ import {
   defineVisibilitySteps
 } from './utils.steps'
 
-async function findRadio (this: CukeWorld, name: string): Promise<WebElement> {
+async function findRadio (this: CukeWorld, name: string): Promise<BrowserElement> {
   return await this.findRadio(name)
 }
 
-async function selectRadio (this: CukeWorld, element: WebElement): Promise<void> {
-  await this.selectRadio(element)
+async function selectRadio (this: CukeWorld, radio: BrowserElement): Promise<void> {
+  await this.selectRadio(radio)
 }
 
-async function isSelected (this: CukeWorld, element: WebElement): Promise<boolean> {
-  return await this.isChecked(element)
+async function isSelected (this: CukeWorld, radio: BrowserElement): Promise<boolean> {
+  return await this.isChecked(radio)
 }
 
-async function isNotSelected (this: CukeWorld, element: WebElement): Promise<boolean> {
-  return await this.isUnchecked(element)
+async function isNotSelected (this: CukeWorld, radio: BrowserElement): Promise<boolean> {
+  return await this.isUnchecked(radio)
 }
 
 defineActionSteps('select', selectRadio, 'radio button', findRadio)

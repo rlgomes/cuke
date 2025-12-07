@@ -1,33 +1,33 @@
-import type { CukeWorld, WebElement } from './world'
+import type { CukeWorld, BrowserElement } from '../index'
 import {
   defineActionSteps,
   defineVisibilitySteps,
   defineInStateSteps
 } from './utils.steps'
 
-async function findSwitch (this: CukeWorld, name: string): Promise<WebElement> {
+async function findSwitch (this: CukeWorld, name: string): Promise<BrowserElement> {
   return await this.findSwitch(name)
 }
 
-async function turnOnSwitch (this: CukeWorld, element: WebElement): Promise<void> {
+async function turnOnSwitch (this: CukeWorld, element: BrowserElement): Promise<void> {
   if (await this.isChecked(element)) {
     throw new Error('switch is already on')
   }
   await element.click()
 }
 
-async function turnOffSwitch (this: CukeWorld, element: WebElement): Promise<void> {
+async function turnOffSwitch (this: CukeWorld, element: BrowserElement): Promise<void> {
   if (await this.isUnchecked(element)) {
     throw new Error('switch is already off')
   }
   await element.click()
 }
 
-async function isOn (this: CukeWorld, element: WebElement): Promise<boolean> {
+async function isOn (this: CukeWorld, element: BrowserElement): Promise<boolean> {
   return await this.isChecked(element)
 }
 
-async function isOff (this: CukeWorld, element: WebElement): Promise<boolean> {
+async function isOff (this: CukeWorld, element: BrowserElement): Promise<boolean> {
   return await this.isUnchecked(element)
 }
 
