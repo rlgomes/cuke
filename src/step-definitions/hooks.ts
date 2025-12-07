@@ -8,7 +8,6 @@ import {
 import * as captureConsole from 'capture-console'
 import { dirname } from 'path'
 import { initCucumber } from '../cucumber'
-import { logging } from 'selenium-webdriver'
 import { v4 as uuidv4 } from 'uuid'
 import { loadEnvs } from '../envs'
 
@@ -29,15 +28,9 @@ Before(function (this: any, testCase: any) {
 })
 
 After(async function () {
-  if (this.driver !== undefined) {
+  if (this.browser !== undefined) {
     // collect browser logs and attach to the cucumber-js results
-    const entries = await this.driver.manage().logs().get(logging.Type.BROWSER)
-
-    const logs: string[] = entries.map((entry: logging.Entry) => {
-      const date = new Date(entry.timestamp).toLocaleString()
-      const level: string = entry.level.toString().padEnd(7, ' ')
-      return `${date}: ${level} - ${entry.message}`
-    })
+    const logs: string[] = await this.browser.getConsoleLogs()
 
     if (logs.length !== 0) {
       this.attach(
@@ -47,8 +40,8 @@ After(async function () {
     }
 
     if (process.env.CUKE_KEEP_BROWSER_ALIVE !== 'true') {
-      await this.driver.quit()
-      this.driver = undefined
+      await this.browser.quit()
+      // this.browser = undefined // BrowserPlatform handles its own state, or we can set it to undefined if we want to enforce it
     }
   }
 })
@@ -71,10 +64,9 @@ BeforeStep(async function () {
 })
 
 AfterStep(async function () {
-  if (this.driver !== undefined) {
-    await this.driver.takeScreenshot().then((image: any) => {
-      this.attach(image, 'base64:image/png')
-    })
+  if (this.browser !== undefined) {
+    const image = await this.browser.takeScreenshot()
+    this.attach(image, 'base64:image/png')
   }
 
   // all stdout/stderr captured is attached as HTML after each step in the

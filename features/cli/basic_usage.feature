@@ -21,5 +21,14 @@ Feature: Basic CLI Usage
   Scenario: User gets a non zero exit code when running a sceanrio that fails
     Given I run the command "cuke run data/features/feature_with_failing_scenario.feature --env USER=foobar --output ${OUTPUT_DIR}/cli_basic_failing_scenario"
      Then I should see that "${result.stdout}" contains "✘ failed"
-      And I should see that "${result.status}" is equal to "1" 
+      And I should see that "${result.status}" is equal to "1"
 
+  Scenario: User can a simple browser test using selenium
+    Given I run the command "cuke run --browser-platform selenium data/features/feature_with_browser_interactions.feature --output ${OUTPUT_DIR}/cli_browser_selenium"
+     Then I should see that "${result.stdout}" contains "I open a browser at"
+      And I should see that "${result.status}" is equal to "0"
+
+  Scenario: User can a simple browser test using playwright
+    Given I run the command "cuke run --browser-platform playwright data/features/feature_with_browser_interactions.feature --output ${OUTPUT_DIR}/cli_browser_playwright"
+     Then I should see that "${result.stdout}" contains "I open a browser at"
+      And I should see that "${result.status}" is equal to "0"

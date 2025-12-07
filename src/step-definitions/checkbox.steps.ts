@@ -1,4 +1,4 @@
-import type { CukeWorld, WebElement } from './world'
+import type { CukeWorld, BrowserElement } from '../index'
 
 import {
   defineActionSteps,
@@ -6,24 +6,24 @@ import {
   defineVisibilitySteps
 } from './utils.steps'
 
-async function findCheckbox (this: CukeWorld, name: string): Promise<WebElement> {
+async function findCheckbox (this: CukeWorld, name: string): Promise<BrowserElement> {
   return await this.findCheckbox(name)
 }
 
-async function checkCheckbox (this: CukeWorld, element: WebElement): Promise<void> {
-  await this.checkCheckbox(element)
+async function checkCheckbox (this: CukeWorld, checkbox: BrowserElement): Promise<void> {
+  await this.checkCheckbox(checkbox)
 }
 
-async function unCheckCheckbox (this: CukeWorld, element: WebElement): Promise<void> {
-  await this.unCheckCheckbox(element)
+async function unCheckCheckbox (this: CukeWorld, checkbox: BrowserElement): Promise<void> {
+  await this.unCheckCheckbox(checkbox)
 }
 
-async function isChecked (this: CukeWorld, element: WebElement): Promise<boolean> {
-  return await this.isChecked(element)
+async function isChecked (this: CukeWorld, checkbox: BrowserElement): Promise<boolean> {
+  return await this.isChecked(checkbox)
 }
 
-async function isUnchecked (this: CukeWorld, element: WebElement): Promise<boolean> {
-  return await this.isUnchecked(element)
+async function isUnchecked (this: CukeWorld, checkbox: BrowserElement): Promise<boolean> {
+  return await this.isUnchecked(checkbox)
 }
 
 defineActionSteps('check', checkCheckbox, 'checkbox', findCheckbox)

@@ -1,27 +1,27 @@
-import type { CukeWorld, WebElement } from './world'
+import type { CukeWorld, BrowserElement } from '../index'
 import {
   defineActionSteps,
   defineVisibilitySteps,
   defineInStateSteps
 } from './utils.steps'
 
-async function findButton (this: CukeWorld, name: string): Promise<WebElement> {
+async function findButton (this: CukeWorld, name: string): Promise<BrowserElement> {
   return await this.findButton(name)
 }
 
-async function clickButton (this: CukeWorld, element: WebElement): Promise<void> {
+async function clickElement (this: CukeWorld, element: BrowserElement): Promise<void> {
   await this.clickElement(element)
 }
 
-async function isEnabled (this: CukeWorld, element: WebElement): Promise<boolean> {
+async function isEnabled (this: CukeWorld, element: BrowserElement): Promise<boolean> {
   return await this.isEnabled(element)
 }
 
-async function isDisabled (this: CukeWorld, element: WebElement): Promise<boolean> {
+async function isDisabled (this: CukeWorld, element: BrowserElement): Promise<boolean> {
   return await this.isDisabled(element)
 }
 
-defineActionSteps('click', clickButton, 'button', findButton)
+defineActionSteps('click', clickElement, 'button', findButton)
 defineVisibilitySteps('button', findButton)
 defineInStateSteps('button', findButton, 'enabled', isEnabled)
 defineInStateSteps('button', findButton, 'disabled', isDisabled)

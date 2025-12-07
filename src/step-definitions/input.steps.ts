@@ -1,10 +1,8 @@
-import { type CukeWorld, type WebElement, Step } from '../index'
+import { type CukeWorld, type BrowserElement, Step } from '../index'
 import {
   defineVisibilitySteps,
   defineInStateSteps
 } from './utils.steps'
-
-import { By } from 'selenium-webdriver'
 
 Step('I write "{arg}" into the input "{arg}"',
   async function (this: CukeWorld, value: string, name: string) {
@@ -33,10 +31,7 @@ Step('I send the key "{arg}" to the focused element',
 
 Step('I send the key "{arg}" to the page',
   async function (this: CukeWorld, key: string) {
-    await this.waitFor(async () => {
-      const body = this.driver.findElement(By.tagName('body'))
-      await this.sendKeyToElement(body, key)
-    })
+    await this.sendKeyToPage(key)
   }
 )
 
@@ -60,7 +55,7 @@ Step('I should see the input "{arg}" is equal to "{arg}"',
   async function (this: CukeWorld, name: string, value: string) {
     await this.waitFor(async () => {
       const input = await this.findInput(name)
-      const inputValue: string = await input.getAttribute('value')
+      const inputValue: string = await input.getAttribute('value') ?? ''
       if (inputValue !== value) {
         throw new Error(
           `input ${name} has value ${inputValue} instead of expected ${value}`
@@ -74,7 +69,7 @@ Step('I should see the input "{arg}" is equal to "{arg}" waiting up to "{seconds
   async function (this: CukeWorld, name: string, value: string, seconds: string) {
     await this.waitFor(async () => {
       const input = await this.findInput(name)
-      const inputValue: string = await input.getAttribute('value')
+      const inputValue: string = await input.getAttribute('value') ?? ''
       if (inputValue !== value) {
         throw new Error(
           `input ${name} has value ${inputValue} instead of expected ${value}`
@@ -87,15 +82,15 @@ Step('I should see the input "{arg}" is equal to "{arg}" waiting up to "{seconds
   }
 )
 
-async function findInput (this: CukeWorld, name: string): Promise<WebElement> {
+async function findInput (this: CukeWorld, name: string): Promise<BrowserElement> {
   return await this.findInput(name)
 }
 
-async function isEnabled (this: CukeWorld, element: WebElement): Promise<boolean> {
+async function isEnabled (this: CukeWorld, element: BrowserElement): Promise<boolean> {
   return await this.isEnabled(element)
 }
 
-async function isDisabled (this: CukeWorld, element: WebElement): Promise<boolean> {
+async function isDisabled (this: CukeWorld, element: BrowserElement): Promise<boolean> {
   return await this.isDisabled(element)
 }
 

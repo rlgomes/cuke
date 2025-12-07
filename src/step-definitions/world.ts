@@ -1,13 +1,12 @@
 import { World } from '@cucumber/cucumber'
-import { Builder, logging } from 'selenium-webdriver'
-import * as chrome from 'selenium-webdriver/chrome'
-import Debug from 'debug'
+import { type BrowserPlatform } from '../platform/BrowserPlatform'
+import { SeleniumBrowserPlatform } from '../platform/selenium/SeleniumBrowserPlatform'
+import { type BrowserElement } from '../platform/BrowserElement'
+import { PlaywrightBrowserPlatform } from '../platform/playwright/PlaywrightBrowserPlatform'
 import { readFileSync } from 'fs'
 import { join } from 'path'
-import { By, Key, type WebElement } from 'selenium-webdriver'
+import Debug from 'debug'
 import { retry } from 'ts-retry-promise'
-
-import 'chromedriver'
 
 const JQUERY_JS = readFileSync(
   join(__dirname, '..', '..', 'node_modules', 'jquery', 'dist', 'jquery.slim.min.js'),
@@ -15,7 +14,7 @@ const JQUERY_JS = readFileSync(
 const FUZZY_JS = readFileSync(join(__dirname, '..', 'fuzzy.js'), 'utf-8')
 
 class CukeWorld extends World {
-  driver: any = undefined
+  browser: BrowserPlatform
   debug = Debug('cuke')
 
   afterPageLoadChecks: Record<string, () => Promise<void>>
@@ -23,6 +22,12 @@ class CukeWorld extends World {
   constructor (options: any) {
     super(options)
     this.afterPageLoadChecks = {}
+
+    if (process.env.CUKE_BROWSER_PLATFORM === 'playwright') {
+      this.browser = new PlaywrightBrowserPlatform()
+    } else {
+      this.browser = new SeleniumBrowserPlatform()
+    }
   }
 
   async handleSTDERR (text: string): Promise<void> {
@@ -33,37 +38,12 @@ class CukeWorld extends World {
   // we use some other more generic browser automation framework that would allow
   // us to flip between webdriver/cypress/nightwatch/etc ?
   async openBrowser (url: string): Promise<void> {
-    const options = new chrome.Options()
-
-    const prefs = new logging.Preferences()
-    prefs.setLevel(logging.Type.BROWSER, logging.Level.ALL)
-    options.setLoggingPrefs(prefs)
-
-    const width: string = process.env.BROWSER_WIDTH ?? '1920'
-    const height: string = process.env.BROWSER_HEIGHT ?? '1200'
-
-    options.addArguments(`--window-size=${width},${height}`)
-
-    const userDataDir: string = process.env.CHROME_USER_DATA_DIR
-    if (userDataDir != null) {
-      options.addArguments(`--user-data-dir=${userDataDir}`)
-    }
-
-    if (process.env.CUKE_HEADLESS === 'true') {
-      options.addArguments('--headless')
-    }
-
-    this.driver = await new Builder()
-      .forBrowser('chrome')
-      .setChromeOptions(options)
-      .build()
-
-    await this.driver.get(url)
+    await this.browser.open(url)
     await this.waitForPageToLoad()
   }
 
   async refreshBrowser (): Promise<void> {
-    await this.driver.navigate().refresh()
+    await this.browser.refresh()
   }
 
   async fuzzyFind (
@@ -73,37 +53,35 @@ class CukeWorld extends World {
     index: number = 0,
     direction: string = 'l2r',
     filterInvisible: boolean = true
-  ): Promise<WebElement> {
+  ): Promise<BrowserElement> {
     const filterBy = filterInvisible ? ':visible' : ''
     this.debug(`fuzzy('${name}', ${JSON.stringify(tags)}, ${JSON.stringify(attributes)}, '${direction}', '${filterBy}')`)
 
-    await this.driver.switchTo().defaultContent()
-    let result = await this.driver.executeScript(
+    await this.browser.switchToDefaultContent()
+    let result = await this.browser.executeScript(
       `${JQUERY_JS};
         ${FUZZY_JS};
         return window.fuzzy.apply(this, arguments);`,
       name, tags, attributes, { direction, filterBy, index }
     )
 
-    let element: WebElement = (result as WebElement[])[index]
+    let element: BrowserElement = (result as BrowserElement[])[index]
 
     if (element === undefined) {
-      const frames: WebElement[] = await this.driver.findElements(By.tagName('iframe'))
+      const frames: BrowserElement[] = await this.browser.findElements('iframe')
 
       for (const frame of frames) {
-        this.debug('switch to default content')
-        await this.driver.switchTo().defaultContent()
-        this.debug(`switch to frame ${await frame.getAttribute('outerHTML')}`)
-        await this.driver.switchTo().frame(frame)
+        await this.browser.switchToDefaultContent()
+        await this.browser.switchToFrame(frame)
 
-        result = await this.driver.executeScript(
+        result = await this.browser.executeScript(
           `${JQUERY_JS};
             ${FUZZY_JS};
             return window.fuzzy.apply(this, arguments);`,
           name, tags, attributes, { direction, filterBy, index }
         )
 
-        element = (result as WebElement[])[index]
+        element = (result as BrowserElement[])[index]
         if (element !== undefined) {
           this.debug('fuzzy returning', await element.getAttribute('outerHTML'))
           return element
@@ -118,43 +96,36 @@ class CukeWorld extends World {
   }
 
   async getCurrentURL (): Promise<string> {
-    return this.driver.getCurrentUrl()
+    return await this.browser.getCurrentUrl()
   }
 
   async openNewTab (url?: string): Promise<void> {
-    if (this.driver === undefined) {
-      throw new Error('no current browser open')
-    }
+    const oldHandles = await this.browser.getAllWindowHandles()
+    await this.browser.executeScript('window.open(arguments[0] || "", "_blank")', url ?? '')
+    const newHandles = await this.browser.getAllWindowHandles()
 
-    const originalHandle = await this.driver.getWindowHandle()
-    await this.driver.executeScript('window.open(arguments[0] || "", "_blank")', url ?? '')
-    const handles = await this.driver.getAllWindowHandles()
-    const newHandle = handles.find((handle: string) => handle !== originalHandle)
+    const newHandle = await this.waitFor(() => {
+      const newHandle = newHandles.find(handle => !oldHandles.includes(handle))
 
-    if (newHandle === undefined) {
-      throw new Error('failed to open new tab')
-    }
+      if (newHandle === undefined) {
+        throw new Error('failed to open new tab')
+      }
 
-    await this.driver.switchTo().window(newHandle)
+      return newHandle
+    })
 
-    if (url !== undefined && url !== '') {
-      await this.driver.get(url)
-      await this.waitForPageToLoad()
-    }
+    await this.browser.switchToWindow(newHandle)
+    await this.waitForPageToLoad()
   }
 
   async switchToNextTab (): Promise<void> {
-    if (this.driver === undefined) {
-      throw new Error('no current browser open')
-    }
-
-    const handles = await this.driver.getAllWindowHandles()
+    const handles = await this.browser.getAllWindowHandles()
 
     if (handles.length < 2) {
       throw new Error('cannot switch tabs: only one tab is open')
     }
 
-    const currentHandle = await this.driver.getWindowHandle()
+    const currentHandle = await this.browser.getWindowHandle()
     const currentIndex: number = handles.indexOf(currentHandle)
 
     if (currentIndex === -1) {
@@ -163,22 +134,18 @@ class CukeWorld extends World {
 
     // Switch to next tab, wrapping around if at the end
     const nextIndex = (currentIndex + 1) % handles.length
-    await this.driver.switchTo().window(handles[nextIndex])
+    await this.browser.switchToWindow(handles[nextIndex])
     await this.waitForPageToLoad()
   }
 
   async switchToPreviousTab (): Promise<void> {
-    if (this.driver === undefined) {
-      throw new Error('no current browser open')
-    }
-
-    const handles: string[] = await this.driver.getAllWindowHandles()
+    const handles: string[] = await this.browser.getAllWindowHandles()
 
     if (handles.length < 2) {
       throw new Error('cannot switch tabs: only one tab is open')
     }
 
-    const currentHandle = await this.driver.getWindowHandle()
+    const currentHandle = await this.browser.getWindowHandle()
     const currentIndex = handles.indexOf(currentHandle)
 
     if (currentIndex === -1) {
@@ -187,32 +154,25 @@ class CukeWorld extends World {
 
     // Switch to previous tab, wrapping around if at the beginning
     const previousIndex = (currentIndex - 1 + handles.length) % handles.length
-    await this.driver.switchTo().window(handles[previousIndex])
+    await this.browser.switchToWindow(handles[previousIndex])
     await this.waitForPageToLoad()
   }
 
   async closeCurrentTab (): Promise<void> {
-    if (this.driver === undefined) {
-      throw new Error('no current browser open')
-    }
-
-    const handles = await this.driver.getAllWindowHandles()
+    const handles = await this.browser.getAllWindowHandles()
 
     if (handles.length === 1) {
       throw new Error('cannot close the last remaining tab')
     }
 
     // Close the current tab
-    await this.driver.close()
+    await this.browser.closeCurrentWindow()
 
     // Switch to the first remaining tab
-    const remainingHandles = await this.driver.getAllWindowHandles()
+    const remainingHandles = await this.browser.getAllWindowHandles()
     if (remainingHandles.length > 0) {
-      await this.driver.switchTo().window(remainingHandles[0])
+      await this.browser.switchToWindow(remainingHandles[0])
       await this.waitForPageToLoad()
-    } else {
-      // If no tabs remain, set driver to undefined
-      this.driver = undefined
     }
   }
 
@@ -246,21 +206,21 @@ class CukeWorld extends World {
     this.buttonAttributes.push(name)
   }
 
-  async findButton (name: string): Promise<WebElement> {
+  async findButton (name: string): Promise<BrowserElement> {
     return await this.fuzzyFind(name, this.buttonExpressions, this.buttonAttributes)
   }
 
-  async clickElement (element: WebElement): Promise<void> {
+  async clickElement (element: BrowserElement): Promise<void> {
     await element.click()
     await this.waitForPageToLoad()
   }
 
   async hoverOverButton (name: string): Promise<void> {
     const button = await this.findButton(name)
-    return this.driver.actions().move({ origin: button }).perform()
+    await this.browser.hover(button)
   }
 
-  async findCheckbox (name: string): Promise<WebElement> {
+  async findCheckbox (name: string): Promise<BrowserElement> {
     // priority for checkboxes labelled right to left (r2l)
     const result = await this.fuzzyFind(
       name,
@@ -283,17 +243,17 @@ class CukeWorld extends World {
     )
   }
 
-  async isChecked (element: WebElement): Promise<boolean> {
+  async isChecked (element: BrowserElement): Promise<boolean> {
     const ariaChecked = await element.getAttribute('aria-checked')
     const checked = await element.isSelected()
     return (checked || ariaChecked === 'true')
   }
 
-  async isUnchecked (element: WebElement): Promise<boolean> {
+  async isUnchecked (element: BrowserElement): Promise<boolean> {
     return !(await this.isChecked(element))
   }
 
-  async checkCheckbox (checkbox: WebElement): Promise<void> {
+  async checkCheckbox (checkbox: BrowserElement): Promise<void> {
     if (await this.isChecked(checkbox)) {
       throw new Error('checkbox is already checked')
     }
@@ -301,7 +261,7 @@ class CukeWorld extends World {
     await checkbox.click()
   }
 
-  async unCheckCheckbox (checkbox: WebElement): Promise<void> {
+  async unCheckCheckbox (checkbox: BrowserElement): Promise<void> {
     if (await this.isUnchecked(checkbox)) {
       throw new Error('checkbox is already unchecked')
     }
@@ -319,7 +279,7 @@ class CukeWorld extends World {
     'title'
   ]
 
-  async findRadio (name: string): Promise<WebElement> {
+  async findRadio (name: string): Promise<BrowserElement> {
     // priority for radios labelled right to left (r2l)
     const result = await this.fuzzyFind(
       name,
@@ -342,7 +302,7 @@ class CukeWorld extends World {
     )
   }
 
-  async selectRadio (radio: WebElement): Promise<void> {
+  async selectRadio (radio: BrowserElement): Promise<void> {
     if (await this.isChecked(radio)) {
       return
     }
@@ -361,7 +321,7 @@ class CukeWorld extends World {
     'title'
   ]
 
-  async findSwitch (name: string): Promise<WebElement> {
+  async findSwitch (name: string): Promise<BrowserElement> {
     // priority for switches labelled left to right (l2r)
     const result = await this.fuzzyFind(name, this.switchExpressions, this.switchAttributes, 0, 'r2l')
 
@@ -397,22 +357,22 @@ class CukeWorld extends World {
     'placeholder'
   ]
 
-  async findInput (name: string): Promise<WebElement> {
+  async findInput (name: string): Promise<BrowserElement> {
     return await this.fuzzyFind(name, this.inputExpressions, this.inputAttributes)
   }
 
   async clearInput (name: string): Promise<void> {
     const input = await this.findInput(name)
-    await this.clearElement(input)
+    await input.clear()
   }
 
-  async clearElement (element: WebElement): Promise<void> {
+  async clearElement (element: BrowserElement): Promise<void> {
     const value = await element.getAttribute('value')
 
     if (value != null) {
       // convert each character in the element into a backspace (like a user would)
       value.split('').forEach(() => {
-        element.sendKeys(Key.BACK_SPACE).catch((err) => {
+        element.sendKeys('\uE003').catch((err) => {
           throw err
         })
       })
@@ -426,8 +386,8 @@ class CukeWorld extends World {
     }
 
     await this.clickElement(input)
-    const focusedElement = await this.driver.switchTo().activeElement()
-    await focusedElement.sendKeys(value)
+    const focusedElement = await this.browser.findElement(':focus')
+    await focusedElement.type(value)
   }
 
   async sendKeyToInput (name: string, key: string): Promise<void> {
@@ -439,49 +399,44 @@ class CukeWorld extends World {
     await this.sendKeyToElement(input, key)
   }
 
-  async getFocusedElement (): Promise<WebElement> {
-    return this.driver.switchTo().activeElement()
+  async getFocusedElement (): Promise<BrowserElement> {
+    return await this.browser.findElement(':focus')
   }
 
-  async sendKeyToElement (element: WebElement, key: string): Promise<void> {
-    let keyName = key.toUpperCase()
-    let keyToSend
-
-    if (keyName === 'BACKSPACE') { keyName = 'BACK_SPACE' }
-    if (keyName in Key) {
-      keyToSend = Key[keyName as keyof typeof Key]
-    } else {
-      keyToSend = key
-    }
-
+  async sendKeyToElement (element: BrowserElement, key: string): Promise<void> {
     await this.clickElement(element)
-    const focusedElement = await this.driver.switchTo().activeElement()
-    await focusedElement.sendKeys(keyToSend)
+    const focusedElement = await this.browser.findElement(':focus')
+    await focusedElement.sendKeys(key)
   }
 
-  async findText (value: string): Promise<WebElement> {
+  async sendKeyToPage (key: string): Promise<void> {
+    const body = await this.browser.findElement('body')
+    await body.sendKeys(key)
+  }
+
+  async findText (value: string): Promise<BrowserElement> {
     return await this.fuzzyFind(value, ['*'], [])
   }
 
   async hoverOverText (value: string): Promise<void> {
     const text = await this.findText(value)
-    await this.driver.actions().move({ origin: text }).perform()
+    await this.browser.hover(text)
   }
 
   headerExpressions: string[] = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']
 
-  async findHeader (name: string): Promise<WebElement> {
+  async findHeader (name: string): Promise<BrowserElement> {
     return await this.fuzzyFind(name, this.headerExpressions, [])
   }
 
   dropdownExpressions: string[] = ['select', '*[role=combobox]']
   dropdownAttributes: string[] = ['aria-label', 'title']
 
-  async findDropdown (name: string): Promise<WebElement> {
+  async findDropdown (name: string): Promise<BrowserElement> {
     return await this.fuzzyFind(name, this.dropdownExpressions, this.dropdownAttributes, 0)
   }
 
-  async findDropdownOption (name: string): Promise<WebElement> {
+  async findDropdownOption (name: string): Promise<BrowserElement> {
     return await this.fuzzyFind(name, this.dropdownExpressions, this.dropdownAttributes, 0, 'l2r', false)
   }
 
@@ -512,38 +467,38 @@ class CukeWorld extends World {
 
   expandableAttributes: string[] = ['aria-label', 'title']
 
-  async findExpandable (name: string): Promise<WebElement> {
+  async findExpandable (name: string): Promise<BrowserElement> {
     return await this.fuzzyFind(name, this.expandableExpressions, this.expandableAttributes)
   }
 
-  async isExpanded (element: WebElement): Promise<boolean> {
+  async isExpanded (element: BrowserElement): Promise<boolean> {
     const ariaExpanded = await element.getAttribute('aria-expanded')
     return ariaExpanded === 'true'
   }
 
-  async isClosed (element: WebElement): Promise<boolean> {
+  async isClosed (element: BrowserElement): Promise<boolean> {
     return !(await this.isExpanded(element))
   }
 
-  async openExpandable (expandable: WebElement): Promise<void> {
+  async openExpandable (expandable: BrowserElement): Promise<void> {
     if (!(await this.isExpanded(expandable))) {
       await this.clickElement(expandable)
     }
   }
 
-  async closeExpandable (expandable: WebElement): Promise<void> {
+  async closeExpandable (expandable: BrowserElement): Promise<void> {
     if (await this.isExpanded(expandable)) {
       await this.clickElement(expandable)
     }
   }
 
-  async isEnabled (element: WebElement): Promise<boolean> {
+  async isEnabled (element: BrowserElement): Promise<boolean> {
     const disabled = await element.getAttribute('disabled')
     const ariaDisabled = await element.getAttribute('aria-disabled')
     return (disabled == null && ariaDisabled !== 'true')
   }
 
-  async isDisabled (element: WebElement): Promise<boolean> {
+  async isDisabled (element: BrowserElement): Promise<boolean> {
     return !(await this.isEnabled(element))
   }
 
@@ -553,10 +508,7 @@ class CukeWorld extends World {
 
   async waitForPageToLoad (): Promise<void> {
     return await this.waitFor(async () => {
-      const readyState = await this.driver.executeScript('return document.readyState')
-      if (readyState !== 'complete') {
-        throw new Error(`document.readyState expected: "complete", got "${readyState as string}"`)
-      }
+      await this.browser.waitForPageToLoad()
 
       Object.keys(this.afterPageLoadChecks).forEach((name: string) => {
         this.debug(`running afterPageLoadCheck: ${name}`)
@@ -593,4 +545,4 @@ class CukeWorld extends World {
   }
 }
 
-export { CukeWorld, WebElement }
+export { CukeWorld, type BrowserElement }
