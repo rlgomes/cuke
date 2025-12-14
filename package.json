@@ -14,12 +14,13 @@
     "coverage:cuke:selenium": "mkdir -p output/selenium && nyc --reporter=json --report-dir=coverage/cuke-selenium dist/cli.js run features --browser-platform selenium --output output/selenium",
     "coverage:cuke": "npm run coverage:cuke:playwright && npm run coverage:cuke:selenium",
     "postcoverage:cuke": "cp coverage/cuke-playwright/coverage-final.json coverage/cuke-playwright-final.json && cp coverage/cuke-selenium/coverage-final.json coverage/cuke-selenium-final.json",
-
     "coverage:unit": "jest --coverage",
     "postcoverage:unit": "cp coverage/jest/coverage-final.json coverage/jest-final.json",
     "precoverage": "rm -fr coverage",
+    
     "coverage": "npm run coverage:cuke && npm run coverage:unit",
     "postcoverage": "nyc merge coverage coverage/coverage-final.json && nyc report --check-coverage --temp-dir coverage --reporter=text --reporter=html",
+
     "watch": "tsc -w"
   },
   "nyc": {

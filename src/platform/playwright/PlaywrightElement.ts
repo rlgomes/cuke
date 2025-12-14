@@ -52,14 +52,16 @@ export class PlaywrightElement implements BrowserElement {
   }
 
   async getAttribute (name: string): Promise<string | null> {
-    if (name === 'value') {
+    let value
+
+    if (['value', 'outerHTML'].includes(name)) {
       /* istanbul ignore next */
-      const value = await (this.element as any).evaluate((el: any) => el.value)
-      if (value !== undefined && value !== null) {
-        return String(value)
-      }
+      value = await (this.element as any).evaluate((el: any, key: string) => el[key], name)
+    } else {
+      value = await this.element.getAttribute(name)
     }
-    return await this.element.getAttribute(name)
+
+    return value
   }
 
   async isSelected (): Promise<boolean> {

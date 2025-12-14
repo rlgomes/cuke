@@ -4,7 +4,7 @@ module.exports = {
   coverageDirectory: './coverage/jest',
 
   preset: 'ts-jest',
-  testEnvironment: 'jsdom',
+  testEnvironment: 'node',
   roots: ['<rootDir>/tests'],
   testMatch: ['**/*.test.ts'],
   transform: {

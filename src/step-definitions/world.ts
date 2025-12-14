@@ -4,14 +4,16 @@ import { SeleniumBrowserPlatform } from '../platform/selenium/SeleniumBrowserPla
 import { type BrowserElement } from '../platform/BrowserElement'
 import { PlaywrightBrowserPlatform } from '../platform/playwright/PlaywrightBrowserPlatform'
 import { readFileSync } from 'fs'
-import { join } from 'path'
+import { join, resolve } from 'path'
 import Debug from 'debug'
 import { retry } from 'ts-retry-promise'
 
-const JQUERY_JS = readFileSync(
-  join(__dirname, '..', '..', 'node_modules', 'jquery', 'dist', 'jquery.slim.min.js'),
-  'utf-8')
-const FUZZY_JS = readFileSync(join(__dirname, '..', 'fuzzy.js'), 'utf-8')
+const jqueryJSPath = resolve(
+  join(__dirname, '..', '..', 'node_modules', 'jquery', 'dist', 'jquery.slim.min.js'))
+const JQUERY_JS = readFileSync(jqueryJSPath, 'utf-8')
+
+const fuzzyJSPath = resolve(join(__dirname, '..', '..', 'dist', 'fuzzy.js'))
+const FUZZY_JS = readFileSync(fuzzyJSPath, 'utf-8')
 
 class CukeWorld extends World {
   browser: BrowserPlatform
@@ -19,7 +21,7 @@ class CukeWorld extends World {
 
   afterPageLoadChecks: Record<string, () => Promise<void>>
 
-  constructor (options: any) {
+  constructor (options: any = {}) {
     super(options)
     this.afterPageLoadChecks = {}
 
@@ -34,16 +36,25 @@ class CukeWorld extends World {
     this.attach(`STDERR: ${text}`)
   }
 
-  // XXX: here is where we can decide if selenium-webriver is enough or should
-  // we use some other more generic browser automation framework that would allow
-  // us to flip between webdriver/cypress/nightwatch/etc ?
   async openBrowser (url: string): Promise<void> {
     await this.browser.open(url)
     await this.waitForPageToLoad()
   }
 
+  async quit (): Promise<void> {
+    await this?.browser.quit()
+  }
+
   async refreshBrowser (): Promise<void> {
     await this.browser.refresh()
+  }
+
+  async findElements (selector: string): Promise<BrowserElement[]> {
+    return await this.browser.findElements(selector)
+  }
+
+  async findElement (selector: string): Promise<BrowserElement> {
+    return await this.browser.findElement(selector)
   }
 
   async fuzzyFind (

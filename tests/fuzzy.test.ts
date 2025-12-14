@@ -1,3 +1,7 @@
+/**
+ * @jest-environment jsdom
+ */
+
 import { readFileSync } from 'fs'
 import { join } from 'path'
 
@@ -13,11 +17,12 @@ describe('fuzzy', () => {
   beforeEach(() => {
     global.console = require('console')
 
-    if (process.env.DEBUG == null) { 
+    if (process.env.DEBUG == null) {
       console.debug = () => {}
     }
+    // eslint-disable-next-line
     window.eval(JQUERY_JS)
-  });
+  })
 
   function fuzzy (
     name: string,
@@ -29,7 +34,7 @@ describe('fuzzy', () => {
       root?: Element
       index?: number
     } = {}
-  ) {
+  ): HTMLElement[] {
     // in jsdom the visibility method doesn't work right
     options.filterBy = ''
     options.index = 0 // early exit for each match
@@ -38,7 +43,7 @@ describe('fuzzy', () => {
 
   describe('basic element matching', () => {
     it('should fail to find element', () => {
-      document.body.innerHTML = `<button>click me</button>`
+      document.body.innerHTML = '<button>click me</button>'
       expect(fuzzy('click you', ['button'], []).length).toBe(0)
     })
 
@@ -49,7 +54,7 @@ describe('fuzzy', () => {
         <button>don't click me</button>
       `
 
-      const [ button ] = fuzzy('click me', ['button'], [])
+      const [button] = fuzzy('click me', ['button'], [])
       expect(button.tagName.toLowerCase()).toBe('button')
       expect(button.textContent).toBe('click me')
     })
@@ -61,7 +66,7 @@ describe('fuzzy', () => {
         <button>don't click me</button>
       `
 
-      const [ button ] = fuzzy('please', ['button'], [])
+      const [button] = fuzzy('please', ['button'], [])
       expect(button.tagName.toLowerCase()).toBe('button')
       expect(button.textContent).toBe('click me, please')
     })
@@ -73,7 +78,7 @@ describe('fuzzy', () => {
         <button>don't click me</button>
       `
 
-      const [ button ] = fuzzy('click me, please', ['button'], ['aria-label'])
+      const [button] = fuzzy('click me, please', ['button'], ['aria-label'])
       expect(button.tagName.toLowerCase()).toBe('button')
       expect(button.textContent).toBe('itsa me mario')
     })
@@ -85,7 +90,7 @@ describe('fuzzy', () => {
         <button>don't click me</button>
       `
 
-      const [ button ] = fuzzy('click me, please', ['button'], ['aria-label'])
+      const [button] = fuzzy('click me, please', ['button'], ['aria-label'])
       expect(button.tagName.toLowerCase()).toBe('button')
       expect(button.textContent).toBe('itsa me mario')
     })
@@ -97,7 +102,7 @@ describe('fuzzy', () => {
         <button>don't click me</button>
       `
 
-      const [ button ] = fuzzy('please', ['button'], ['aria-label'])
+      const [button] = fuzzy('please', ['button'], ['aria-label'])
       expect(button.tagName.toLowerCase()).toBe('button')
       expect(button.textContent).toBe('itsa me mario')
     })
@@ -109,7 +114,7 @@ describe('fuzzy', () => {
         <button>don't click me</button>
       `
 
-      const [ button ] = fuzzy('please', ['button'], ['aria-label'])
+      const [button] = fuzzy('please', ['button'], ['aria-label'])
       expect(button.tagName.toLowerCase()).toBe('button')
       expect(button.textContent).toBe('itsa me mario')
     })
@@ -121,7 +126,7 @@ describe('fuzzy', () => {
         <button>don't click me</button>
       `
 
-      const [ button ] = fuzzy('click me', ['button'], ['value'])
+      const [button] = fuzzy('click me', ['button'], ['value'])
       expect(button.tagName.toLowerCase()).toBe('button')
       expect(button.textContent).toBe('some button')
     })
@@ -133,7 +138,7 @@ describe('fuzzy', () => {
         <button>don't click me</button>
       `
 
-      const [ button ] = fuzzy('please', ['button'], ['value'])
+      const [button] = fuzzy('please', ['button'], ['value'])
       expect(button.tagName.toLowerCase()).toBe('button')
       expect(button.textContent).toBe('some button')
     })
@@ -150,7 +155,7 @@ describe('fuzzy', () => {
         </div>
       `
 
-      const [ checkbox ] = fuzzy('da checkbox', ['input[type=checkbox]'], [])
+      const [checkbox] = fuzzy('da checkbox', ['input[type=checkbox]'], [])
       expect(checkbox.tagName.toLowerCase()).toBe('input')
       expect(checkbox.id).toBe('dacheckbox')
     })
@@ -160,7 +165,7 @@ describe('fuzzy', () => {
         <label>da checkbox</label><input type="checkbox" id="you found me"></input>
       `
 
-      const [ checkbox ] = fuzzy('da checkbox', ['input[type=checkbox]'], [])
+      const [checkbox] = fuzzy('da checkbox', ['input[type=checkbox]'], [])
       expect(checkbox.tagName.toLowerCase()).toBe('input')
       expect(checkbox.id).toBe('you found me')
     })
@@ -170,7 +175,7 @@ describe('fuzzy', () => {
         <label>da checkbox</label><input type="checkbox" id="you found me"></input>
       `
 
-      const [ checkbox ] = fuzzy('da check', ['input[type=checkbox]'], [])
+      const [checkbox] = fuzzy('da check', ['input[type=checkbox]'], [])
       expect(checkbox.tagName.toLowerCase()).toBe('input')
       expect(checkbox.id).toBe('you found me')
     })
@@ -180,7 +185,7 @@ describe('fuzzy', () => {
         <div>da checkbox<div><input type="checkbox" id="you found me"/></div></div>
       `
 
-      const [ checkbox ] = fuzzy('da checkbox', ['input'], [])
+      const [checkbox] = fuzzy('da checkbox', ['input'], [])
       expect(checkbox.tagName.toLowerCase()).toBe('input')
       expect(checkbox.id).toBe('you found me')
     })
@@ -190,7 +195,7 @@ describe('fuzzy', () => {
         <div>da checkbox that booms<div><input type="checkbox" id="you found me"></input></div></div>
       `
 
-      const [ checkbox ] = fuzzy('da check', ['input[type=checkbox]'], [])
+      const [checkbox] = fuzzy('da check', ['input[type=checkbox]'], [])
       expect(checkbox.tagName.toLowerCase()).toBe('input')
       expect(checkbox.id).toBe('you found me')
     })
@@ -201,7 +206,7 @@ describe('fuzzy', () => {
         <label aria-label="da checkbox"></label>
       `
 
-      const [ checkbox ] = fuzzy('da checkbox', ['[type=checkbox]'], ['aria-label'])
+      const [checkbox] = fuzzy('da checkbox', ['[type=checkbox]'], ['aria-label'])
       expect(checkbox.tagName.toLowerCase()).toBe('input')
       expect(checkbox.id).toBe('you found me')
     })
@@ -212,7 +217,7 @@ describe('fuzzy', () => {
         <label data-aria-label="da checkbox"></label>
       `
 
-      const [ checkbox ] = fuzzy('da checkbox', ['[type=checkbox]'], ['aria-label'])
+      const [checkbox] = fuzzy('da checkbox', ['[type=checkbox]'], ['aria-label'])
       expect(checkbox.tagName.toLowerCase()).toBe('input')
       expect(checkbox.id).toBe('you found me')
     })
@@ -223,7 +228,7 @@ describe('fuzzy', () => {
         <label aria-label="da checkbox"></label>
       `
 
-      const [ checkbox ] = fuzzy('da check', ['[type=checkbox]'], ['aria-label'])
+      const [checkbox] = fuzzy('da check', ['[type=checkbox]'], ['aria-label'])
       expect(checkbox.tagName.toLowerCase()).toBe('input')
       expect(checkbox.id).toBe('you found me')
     })
@@ -234,7 +239,7 @@ describe('fuzzy', () => {
         <label data-aria-label="da checkbox"></label>
       `
 
-      const [ checkbox ] = fuzzy('da check', ['[type=checkbox]'], ['aria-label'])
+      const [checkbox] = fuzzy('da check', ['[type=checkbox]'], ['aria-label'])
       expect(checkbox.tagName.toLowerCase()).toBe('input')
       expect(checkbox.id).toBe('you found me')
     })
@@ -246,7 +251,7 @@ describe('fuzzy', () => {
         </div>
       `
 
-      const [ checkbox ] = fuzzy('da button', ['[role=button]'], ['aria-label'])
+      const [checkbox] = fuzzy('da button', ['[role=button]'], ['aria-label'])
       expect(checkbox.tagName.toLowerCase()).toBe('div')
       expect(checkbox.id).toBe('you found me')
     })
@@ -258,7 +263,7 @@ describe('fuzzy', () => {
         </div>
       `
 
-      const [ checkbox ] = fuzzy('da button', ['[role=button]'], ['aria-label'])
+      const [checkbox] = fuzzy('da button', ['[role=button]'], ['aria-label'])
       expect(checkbox.tagName.toLowerCase()).toBe('div')
       expect(checkbox.id).toBe('you found me')
     })
@@ -270,7 +275,7 @@ describe('fuzzy', () => {
         </div>
       `
 
-      const [ checkbox ] = fuzzy('da but', ['[role=button]'], ['aria-label'])
+      const [checkbox] = fuzzy('da but', ['[role=button]'], ['aria-label'])
       expect(checkbox.tagName.toLowerCase()).toBe('div')
       expect(checkbox.id).toBe('you found me')
     })
@@ -282,7 +287,7 @@ describe('fuzzy', () => {
         </div>
       `
 
-      const [ checkbox ] = fuzzy('da bu', ['[role=button]'], ['aria-label'])
+      const [checkbox] = fuzzy('da bu', ['[role=button]'], ['aria-label'])
       expect(checkbox.tagName.toLowerCase()).toBe('div')
       expect(checkbox.id).toBe('you found me')
     })
@@ -301,7 +306,7 @@ describe('fuzzy', () => {
         </div>
       `
 
-      const [ checkbox ] = fuzzy('find that guy', ['input'], [])
+      const [checkbox] = fuzzy('find that guy', ['input'], [])
       expect(checkbox.tagName.toLowerCase()).toBe('input')
       expect(checkbox.id).toBe('da right one')
     })

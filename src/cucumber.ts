@@ -169,7 +169,7 @@ async function cucumber (paths: string[] = [], options: Options): Promise<void> 
       throw new Error('errors running tests, see above for details')
     }
   } finally {
-    console.log('\nHTML report at output/report.html')
+    console.log(`\nHTML report at ${options.output}/report.html`)
   }
 }
 
