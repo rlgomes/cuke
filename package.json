@@ -10,11 +10,9 @@
     "test:cuke": "cuke run features",
     "test:unit": "jest",
     "test": "npm run test:cuke && npm run test:unit",
-
     "coverage:cuke:playwright": "mkdir -p output/playwright && nyc --reporter=json --report-dir=coverage/cuke-playwright dist/cli.js run features --browser-platform playwright --output output/playwright",
     "coverage:cuke:selenium": "mkdir -p output/selenium && nyc --reporter=json --report-dir=coverage/cuke-selenium dist/cli.js run features --browser-platform selenium --output output/selenium",
     "coverage:cuke": "npm run coverage:cuke:playwright && npm run coverage:cuke:selenium",
-
     "postcoverage:cuke": "cp coverage/cuke-playwright/coverage-final.json coverage/cuke-playwright-final.json && cp coverage/cuke-selenium/coverage-final.json coverage/cuke-selenium-final.json",
 
     "coverage:unit": "jest --coverage",
@@ -43,6 +41,9 @@
   "dependencies": {
     "@cucumber/cucumber": "^8.9.1",
     "@cucumber/html-formatter": "^20.2.1",
+    "@playwright/browser-chromium": "^1.57.0",
+    "@playwright/browser-firefox": "^1.57.0",
+    "@playwright/browser-webkit": "^1.57.0",
     "@types/capture-console": "^1.0.1",
     "@types/debug": "^4.1.7",
     "@types/got": "^9.6.12",
@@ -60,7 +61,7 @@
     "debug": "^4.3.4",
     "dedent": "^0.7.0",
     "dotenv": "^16.0.3",
-    "got": "^14.6.4",
+    "got": "^14.6.5",
     "indent-string": "^5.0.0",
     "jest": "^30.2.0",
     "jquery": "^3.7.1",
