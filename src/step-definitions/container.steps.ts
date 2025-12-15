@@ -8,7 +8,7 @@ const debug = Debug('cuke')
 
 // XXX couldn't find a good docker client so just assuming the docker CLI is
 // available for now
-interface DockerArguments {
+interface ContainerArguments {
   cmd: string
   options?: {
     filter?: string
@@ -16,15 +16,25 @@ interface DockerArguments {
   }
 }
 
-function docker ({
+function getContainerRuntime (): string {
+  const podman = spawnSync('podman', ['--version'])
+  if (podman.status === 0) {
+    return 'podman'
+  }
+  return 'docker'
+}
+
+const runtime = getContainerRuntime()
+
+function container ({
   cmd = '',
   options = {
     filter: '',
     expectedExitCode: '0'
   }
-}: DockerArguments): string[] {
-  debug(`running "docker ${cmd}"`)
-  const result = spawnSync('docker', split(cmd), {
+}: ContainerArguments): string[] {
+  debug(`running "${runtime} ${cmd}"`)
+  const result = spawnSync(runtime, split(cmd), {
     stdio: ['inherit', 'pipe', 'pipe']
   })
 
@@ -40,9 +50,9 @@ function docker ({
   return [result.stdout.toString(), result.stderr.toString()]
 }
 
-function listContainers (filter?: string): string [] {
+function listContainers (filter?: string): string[] {
   const filterBy = filter !== undefined ? `--filter ${filter}` : ''
-  return docker({
+  return container({
     cmd: `ps --all --format {{.Names}} ${filterBy}`
   })[0].split('\n')
 }
@@ -54,69 +64,75 @@ function containerExists (name: string, filter?: string): boolean {
 
 // label every container started by these steps with `cuke-automation` so they
 // are easy to find and clean up
-Step('I run the docker container "{arg}" with image "{arg}"',
+Step('I run the container "{arg}" with image "{arg}"',
   (name: string, image: string) => {
-    docker({ cmd: `run --label cuke-automation --detach --name ${name} --publish-all ${image}` })
+    container({ cmd: `run --label cuke-automation --detach --name ${name} --publish-all ${image}` })
   })
 
-Step('I run the docker container "{arg}" with image "{arg}", ports "{arg}"',
+Step('I run the container "{arg}" with image "{arg}", ports "{arg}"',
   (name: string, image: string, ports: string) => {
     const portsOption = ports.split(',').map((value) => `--publish ${value}`).join(' ')
-    docker({ cmd: `run --label cuke-automation --detach --name ${name} ${portsOption} ${image}` })
+    container({ cmd: `run --label cuke-automation --detach --name ${name} ${portsOption} ${image}` })
   })
 
-Step('I run "{arg}" on the docker image "{arg}"',
+Step('I run "{arg}" on the image "{arg}"',
   (command: string, image: string) => {
-    docker({ cmd: `run --label cuke-automation --rm ${image} ${command}` })
+    container({ cmd: `run --label cuke-automation --rm ${image} ${command}` })
   })
 
-Step('I run "{arg}" on the docker image "{arg}" with volume "{arg}"',
+Step('I run "{arg}" on the image "{arg}" with volume "{arg}"',
   (command: string, image: string, volume: string) => {
-    docker({ cmd: `run --label cuke-automation --rm --volume ${volume} ${image} ${command}` })
+    container({ cmd: `run --label cuke-automation --rm --volume ${volume} ${image} ${command}` })
   })
 
-Step('I kill the docker container "{arg}"',
+Step('I kill the container "{arg}"',
   (name: string) => {
-    docker({ cmd: `kill ${name}` })
+    container({ cmd: `kill ${name}` })
   })
 
-Step('I kill the docker container "{arg}" if it exists',
+Step('I kill the container "{arg}" if it exists',
   (name: string) => {
     if (containerExists(name, 'status=running')) {
-      docker({ cmd: `kill ${name}` })
+      container({ cmd: `kill ${name}` })
     }
   })
 
-Step('I remove the docker container "{arg}"',
-  (name: string) => docker({ cmd: `rm ${name}` })
+Step('I remove the container "{arg}"',
+  (name: string) => container({ cmd: `rm ${name}` })
 )
 
-Step('I remove the docker container "{arg}" if it exists',
+Step('I remove the container "{arg}" if it exists',
   (name: string) => {
     if (containerExists(name)) {
-      docker({ cmd: `rm ${name}` })
+      container({ cmd: `rm ${name}` })
     }
   })
 
-Step('I kill and remove the docker container "{arg}" if it exists',
+Step('I kill and remove the container "{arg}"',
+  (name: string) => {
+    container({ cmd: `kill ${name}` })
+    container({ cmd: `rm ${name}` })
+  })
+
+Step('I kill and remove the container "{arg}" if it exists',
   (name: string) => {
     if (containerExists(name, 'status=running')) {
-      docker({ cmd: `kill ${name}` })
+      container({ cmd: `kill ${name}` })
     }
     if (containerExists(name)) {
-      docker({ cmd: `rm ${name}` })
+      container({ cmd: `rm ${name}` })
     }
   })
 
-Step('I exec "{arg}" on the docker container "{arg}"',
+Step('I exec "{arg}" on the container "{arg}"',
   (command: string, name: string) => {
-    docker({ cmd: `exec -i ${name} ${command}` })
+    container({ cmd: `exec -i ${name} ${command}` })
   })
 
-Step('I exec "{arg}" on the docker container "{arg}" and wait for exit code "{arg}"',
+Step('I exec "{arg}" on the container "{arg}" and wait for exit code "{arg}"',
   async function (this: CukeWorld, command: string, name: string, exitCode: string) {
     await this.waitFor(async () => {
-      docker({
+      container({
         cmd: `exec -i ${name} ${command}`,
         options: {
           expectedExitCode: exitCode
@@ -125,34 +141,15 @@ Step('I exec "{arg}" on the docker container "{arg}" and wait for exit code "{ar
     })
   })
 
-Step('I run the following command on the docker container "{arg}":',
+Step('I run the following command on the container "{arg}":',
   (name: string, command: string) => {
-    docker({ cmd: `exec -i ${name} ${command}` })
+    container({ cmd: `exec -i ${name} ${command}` })
   })
 
-function listNetworks (): string[] {
-  return docker({
-    cmd: 'network ls --format {{.Name}}'
-  })[0].split('\n')
-}
-
-Step('I create the docker network "{arg}" if it does not exist',
-  async function (name: string) {
-    const networks = listNetworks()
-    if (!networks.includes(name)) {
-      docker({ cmd: `network create ${name}` })
-    }
-  })
-
-Step('I connect the docker container "{arg}" to the network "{arg}"',
-  async function (containerName: string, networkName: string) {
-    docker({ cmd: `network connect ${networkName} ${containerName}` })
-  })
-
-Step('I exec "{arg}" on the docker container "{arg}" and wait for stdout to contain "{arg}"',
+Step('I exec "{arg}" on the container "{arg}" and wait for stdout to contain "{arg}"',
   async function (this: CukeWorld, command: string, name: string, output: string) {
     await this.waitFor(async () => {
-      const stdout = docker({
+      const stdout = container({
         cmd: `exec -i ${name} ${command}`
       })[0]
 
@@ -165,10 +162,10 @@ Step('I exec "{arg}" on the docker container "{arg}" and wait for stdout to cont
     })
   })
 
-Step('I exec "{arg}" on the docker container "{arg}" and wait for stdout to match the following:',
+Step('I exec "{arg}" on the container "{arg}" and wait for stdout to match the following:',
   async function (this: CukeWorld, command: string, name: string, output: string) {
     await this.waitFor(async () => {
-      const stdout = docker({
+      const stdout = container({
         cmd: `exec -i ${name} ${command}`
       })[0]
 
@@ -181,10 +178,10 @@ Step('I exec "{arg}" on the docker container "{arg}" and wait for stdout to matc
     })
   })
 
-Step('I exec "{arg}" on the docker container "{arg}" and save stdout to the variable "{arg}"',
+Step('I exec "{arg}" on the container "{arg}" and save stdout to the variable "{arg}"',
   async function (this: CukeWorld, command: string, name: string, variableName: string) {
     await this.waitFor(async () => {
-      const stdout = docker({
+      const stdout = container({
         cmd: `exec -i ${name} ${command}`
       })[0]
 
@@ -192,10 +189,10 @@ Step('I exec "{arg}" on the docker container "{arg}" and save stdout to the vari
     })
   })
 
-Step('I save the host port for the guest port "{arg}" of the docker container "{arg}" to the variable "{arg}"',
+Step('I save the host port for the guest port "{arg}" of the container "{arg}" to the variable "{arg}"',
   async function (this: CukeWorld, guestPort: string, name: string, variable: string) {
     const mapping = await this.waitFor(async () => {
-      return docker({
+      return container({
         cmd: `port ${name} ${guestPort}`
       })[0]
     })
@@ -206,6 +203,7 @@ Step('I save the host port for the guest port "{arg}" of the docker container "{
     //
     // 0.0.0.0:8080
     // [::]:8080
+    //
     //
     process.env[variable] = mapping.split('\n')[0].split(':')[1].trim()
   })

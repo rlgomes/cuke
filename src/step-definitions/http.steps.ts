@@ -1,10 +1,24 @@
 import { type CukeWorld, Step } from '../index'
 
-import got from 'got'
+interface Options {
+  method: string
+  body?: string
+  headers?: Record<string, string>
+}
+
+async function request (url: string, options: Options): Promise<Record<string, string>> {
+  const { default: got } = await import('got')
+  const response = await got(url, options)
+
+  return {
+    body: `${response?.body}`,
+    status: `${response?.statusCode}`
+  }
+}
 
 Step('I send an HTTP "{arg}" to the URL "{arg}"',
   async function (this: CukeWorld, method: string, url: string) {
-    const response = await got(url, { method })
+    const response = await request(url, { method })
     process.env.result = response
   }
 )
@@ -12,9 +26,9 @@ Step('I send an HTTP "{arg}" to the URL "{arg}"',
 Step('I wait for an HTTP "{arg}" to the URL "{arg}" to respond with status code "{arg}"',
   async function (this: CukeWorld, method: string, url: string, status: string) {
     await this.waitFor(async () => {
-      const response = await got(url, { method })
-      if (`${response.statusCode}` !== status) {
-        throw new Error(`Expected response code ${status}, but got ${response.statusCode}`)
+      const response = await request(url, { method })
+      if (`${response.status}` !== status) {
+        throw new Error(`Expected response code ${status}, but got ${response.status}`)
       }
       process.env.result = response
     })
@@ -23,7 +37,7 @@ Step('I wait for an HTTP "{arg}" to the URL "{arg}" to respond with status code 
 
 Step('I send an HTTP "{arg}" to the URL "{arg}" with the following data:',
   async function (this: CukeWorld, method: string, url: string, data: string) {
-    const response = await got(url, { method, body: data })
+    const response = await request(url, { method, body: data })
     process.env.result = response
   }
 )
@@ -39,7 +53,7 @@ Step('I send an HTTP "{arg}" to the URL "{arg}" with headers "{arg}" and the fol
       return Object.assign(map, submap)
     }, {})
 
-    const response = await got(url, { method, body: data, headers: headerMap })
+    const response = await request(url, { method, body: data, headers: headerMap })
     process.env.result = response
   }
 )
