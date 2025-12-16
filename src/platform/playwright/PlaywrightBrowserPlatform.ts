@@ -17,8 +17,8 @@ export class PlaywrightBrowserPlatform implements BrowserPlatform {
       this.browser = await chromium.launch({ headless })
       this.context = await this.browser.newContext({
         viewport: {
-          width: parseInt(process.env.BROWSER_WIDTH ?? '1920'),
-          height: parseInt(process.env.BROWSER_HEIGHT ?? '1200')
+          width: parseInt(process.env.CUKE_BROWSER_WIDTH ?? '1920'),
+          height: parseInt(process.env.CUKE_BROWSER_HEIGHT ?? '1200')
         }
       })
       this.page = await this.context.newPage()
