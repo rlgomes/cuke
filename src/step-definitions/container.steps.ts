@@ -6,8 +6,6 @@ import { type CukeWorld, Step } from '../index'
 
 const debug = Debug('cuke')
 
-// XXX couldn't find a good docker client so just assuming the docker CLI is
-// available for now
 interface ContainerArguments {
   cmd: string
   options?: {

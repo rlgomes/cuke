@@ -25,8 +25,10 @@ and be very hard to maintain.
 ## Testing Commands
 
 - Use `npm run test` to run the full suite of built in cucumber tests as is.
-- Use `npm run coverage` to run the same full suite of cucumber tests but with code coverage instrumentation and reporting.
+- Use `npm run coverage` to run the same full suite of cucumber tests but with
+  code coverage instrumentation and reporting.
 
 ## Notes to LLM
 
-Do not modify the foramt of any of the files as we maintain the code style that we want using various other tools.
+Do not modify the foramt of any of the files as we maintain the code style that
+we want using various other tools.
