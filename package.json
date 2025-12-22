@@ -17,10 +17,8 @@
     "coverage:unit": "jest --coverage",
     "postcoverage:unit": "cp coverage/jest/coverage-final.json coverage/jest-final.json",
     "precoverage": "rm -fr coverage",
-    
     "coverage": "npm run coverage:cuke && npm run coverage:unit",
     "postcoverage": "nyc merge coverage coverage/coverage-final.json && nyc report --check-coverage --temp-dir coverage --reporter=text --reporter=html",
-
     "watch": "tsc -w"
   },
   "nyc": {
@@ -42,6 +40,9 @@
   "dependencies": {
     "@cucumber/cucumber": "^8.9.1",
     "@cucumber/html-formatter": "^20.2.1",
+    "@langchain/core": "^1.1.7",
+    "@langchain/google-genai": "^2.1.2",
+    "@langchain/ollama": "^1.1.0",
     "@playwright/browser-chromium": "^1.57.0",
     "@playwright/browser-firefox": "^1.57.0",
     "@playwright/browser-webkit": "^1.57.0",
@@ -66,6 +67,7 @@
     "indent-string": "^5.0.0",
     "jest": "^30.2.0",
     "jquery": "^3.7.1",
+    "langchain": "^1.2.2",
     "luxon": "^3.2.1",
     "memorystream": "^0.3.1",
     "playwright": "^1.57.0",
@@ -75,7 +77,8 @@
     "ts-jest": "^29.4.5",
     "ts-node": "^10.9.1",
     "ts-retry-promise": "^0.7.0",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "zod": "^4.2.1"
   },
   "devDependencies": {
     "@istanbuljs/nyc-config-typescript": "^1.0.2",
