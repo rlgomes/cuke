@@ -6,5 +6,6 @@ Feature: LLM steps
       And I should see the button "button with inner text label"
      Then I ask AI to validate on screen the following:
       """
-      What do you see in this image ? 
+      * a button with the name "button with inner text label"
+      * the button "button with inner node label"
       """

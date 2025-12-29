@@ -7,6 +7,9 @@ import { ChatOllama } from '@langchain/ollama'
 
 type ModelProvider = 'gemini' | 'ollama'
 
+process.env.LLM_PROVIDER = process.env.LLM_PROVIDER ?? 'ollama'
+process.env.LLM_MODEL = process.env.LLM_MODEL ?? 'gemma3:4b'
+
 function createVisionModel (provider: ModelProvider): BaseChatModel {
   if (provider === 'gemini') {
     return new ChatGoogleGenerativeAI({
@@ -17,7 +20,7 @@ function createVisionModel (provider: ModelProvider): BaseChatModel {
   } else if (provider === 'ollama') {
     // Requires Ollama running locally (ollama serve)
     return new ChatOllama({
-      model: 'gemma3:4b',
+      model: process.env.LLM_MODEL,
       temperature: 0,
       baseUrl: 'http://localhost:11434'
     })
@@ -40,6 +43,15 @@ async function runPrompt (
   ]
 
   const systemMessage = new SystemMessage(`
+  You are an expert at identifying UI elements on an image. You are to validate
+  the statements provided by the user can be true/false when looking at the
+  screen. You don't have acces to the HTML so just make a best effort at
+  identifying names/labels the same way a user would looking at the UI.
+
+  You will respond with an array of results with the fields:
+    * statement from the user.
+    * result stating true/false.
+    * explanation for the statements that are false.
   `)
   const humanMessage = new HumanMessage({ content: contentParts })
   const response = await llm.invoke([systemMessage, humanMessage])
@@ -51,7 +63,7 @@ Step('I ask AI to validate on screen the following:',
     const image = await this.browser.takeScreenshot()
     this.attach(image, 'base64:image/png')
     const base64Image = `data:image/png;base64,${image}`
-    const response = await runPrompt('ollama', base64Image, prompt)
+    const response = await runPrompt(process.env.LLM_PROVIDER, base64Image, prompt)
     const jsonResponse = response.content.replace(/^```json\s*/i, '').replace(/\s*```$/, '')
     console.log(jsonResponse)
   })
