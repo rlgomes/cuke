@@ -2,10 +2,10 @@ Feature: LLM steps
   As an automation engineer I want ...
 
   Scenario: User can assert a button is present
-    Given I open a browser at "file:///${PWD}/data/buttons.html"
-      And I should see the button "button with inner text label"
+    Given I open a browser at "file:///${PWD}/data/mixed.html"
      Then I ask AI to validate on screen the following:
       """
-      * any button with the name "button with inner text label"
-      * any button named "button with inner node label"
+      * a button with the name: Ok
+      * a disabled button with the name: Sure
+      * I shoudln't see a button with the name "foobar"
       """

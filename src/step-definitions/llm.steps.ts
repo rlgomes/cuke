@@ -21,6 +21,7 @@ function createVisionModel (provider: ModelProvider): BaseChatModel {
     // Requires Ollama running locally (ollama serve)
     return new ChatOllama({
       model: process.env.LLM_MODEL,
+      numCtx: 8 * 1024,
       temperature: 0,
       baseUrl: 'http://localhost:11434'
     })
@@ -32,37 +33,17 @@ function createVisionModel (provider: ModelProvider): BaseChatModel {
 async function runPrompt (
   provider: ModelProvider,
   imageDataUri: string,
-  promptText: string
+  systemPrompt: string,
+  userPrompt: string
 ): Promise<any> {
   const llm = createVisionModel(provider)
 
-  // Construct content parts
   const contentParts: any[] = [
-    { type: 'text', text: promptText },
+    { type: 'text', text: userPrompt },
     { type: 'image_url', image_url: { url: imageDataUri } }
   ]
 
-  const systemMessage = new SystemMessage(`
-  You are a Visual QA Automation Agent. Your task is to validate a list of assertions provided by the user against the provided UI screenshot.
-
-  # INSTRUCTIONS
-  1. Analyze the image visually, simulating how a human user reads the UI. Do not assume access to the underlying DOM or HTML.
-  2. For each user-provided statement, determine if it is TRUE (visually supported) or FALSE (visually contradicted or missing).
-  3. FILTER your output: You must return ONLY the statements that are determined to be FALSE.
-  4. If a statement is TRUE, discard it.
-  5. If ALL statements are TRUE, return an empty JSON array: [].
-
-  # OUTPUT FORMAT
-  You must respond with raw JSON only. Do not include Markdown formatting (\`\`\`json), explanations, or preambles.
-  The output must be a JSON Array of Objects with the following schema:
-
-  [
-    {
-      "statement": "The exact statement provided by the user",
-      "explanation": "A concise description of why it failed (e.g., 'Button text says 'Login', not 'Submit'' or 'Element not found')"
-    }
-  ]
-  `)
+  const systemMessage = new SystemMessage(systemPrompt)
   const humanMessage = new HumanMessage({ content: contentParts })
   const response = await llm.invoke([systemMessage, humanMessage])
   return response
@@ -73,7 +54,46 @@ Step('I ask AI to validate on screen the following:',
     const image = await this.browser.takeScreenshot()
     this.attach(image, 'base64:image/png')
     const base64Image = `data:image/png;base64,${image}`
-    const response = await runPrompt(process.env.LLM_PROVIDER, base64Image, prompt)
+    const response = await runPrompt(
+      process.env.LLM_PROVIDER,
+      base64Image,
+      `
+      You are a UI Quality Assurance Auditor and your sole task is to verify if a
+      set of user-statements are visually true or false.
+
+      Return a JSON array of the user-statements that were evaluated with the
+      following schema:
+      {
+        "assertion": "The original text provided by the user",
+        "reasoning": "A brief, one-sentence explanation of the reasoning",
+        "result": "true" | "false",
+      }
+
+      IF no statements are found to be true then you can return an empty array
+      like so: []
+
+      IF no statements are found to be false then you can return an empty array
+      like so: []
+
+      ONLY respond with JSON and do not return any other fillers or explanation
+      into your response.
+      `,
+      prompt)
+    const jsonString = response.content.replace(/^\s*```json/i, '').replace(/```\s*$/, '')
+    const jsonResponse = JSON.parse(jsonString)
+    console.log(jsonResponse)
+  })
+
+Step('I ask AI to examine the current page and respond to the following:',
+  async function (this: CukeWorld, prompt: string) {
+    const image = await this.browser.takeScreenshot()
+    this.attach(image, 'base64:image/png')
+    const base64Image = `data:image/png;base64,${image}`
+    const response = await runPrompt(
+      process.env.LLM_PROVIDER,
+      base64Image,
+      '',
+      prompt)
     const jsonResponse = response.content.replace(/^```json\s*/i, '').replace(/\s*```$/, '')
     console.log(jsonResponse)
   })
