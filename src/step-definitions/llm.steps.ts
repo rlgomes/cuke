@@ -8,7 +8,8 @@ import { ChatOllama } from '@langchain/ollama'
 type ModelProvider = 'gemini' | 'ollama'
 
 process.env.LLM_PROVIDER = process.env.LLM_PROVIDER ?? 'ollama'
-process.env.LLM_MODEL = process.env.LLM_MODEL ?? 'gemma3:4b'
+// smallest and most accurate local vission LLM
+process.env.LLM_MODEL = process.env.LLM_MODEL ?? 'minicpm-v:8B'
 
 function createVisionModel (provider: ModelProvider): BaseChatModel {
   if (provider === 'gemini') {
@@ -74,12 +75,10 @@ Step('I ask AI to validate on screen the following:',
 
       IF no statements are found to be false then you can return an empty array
       like so: []
-
-      ONLY respond with JSON and do not return any other fillers or explanation
-      into your response.
       `,
       prompt)
     const jsonString = response.content.replace(/^\s*```json/i, '').replace(/```\s*$/, '')
+    console.log(jsonString)
     const jsonResponse = JSON.parse(jsonString)
     console.log(jsonResponse)
   })
