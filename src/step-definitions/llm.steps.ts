@@ -64,11 +64,13 @@ Step('I ask AI to validate on screen the following:',
 
       Return a JSON array of the user-statements that were evaluated with the
       following schema:
-      {
-        "assertion": "The original text provided by the user",
-        "reasoning": "A brief, one-sentence explanation of the reasoning",
-        "result": "true" | "false",
-      }
+      [
+        {
+          "assertion": "The original text provided by the user",
+          "reasoning": "A brief, one-sentence explanation of the reasoning",
+          "result": "true" | "false",
+        }
+      ] 
 
       IF no statements are found to be true then you can return an empty array
       like so: []
@@ -78,9 +80,15 @@ Step('I ask AI to validate on screen the following:',
       `,
       prompt)
     const jsonString = response.content.replace(/^\s*```json/i, '').replace(/```\s*$/, '')
-    console.log(jsonString)
-    const jsonResponse = JSON.parse(jsonString)
-    console.log(jsonResponse)
+    const jsonResponse: any[] = JSON.parse(jsonString)
+
+    for (let index = 0; index < jsonResponse.length; index++) {
+      const validation: any = jsonResponse[index]
+
+      if (validation.result !== 'true') {
+        throw new Error(validation.reasoning)
+      }
+    }
   })
 
 Step('I ask AI to examine the current page and respond to the following:',

@@ -1,10 +1,157 @@
-<html>
-  <head>
-    <title>mixed!</title>
-  </head>
-  <body>
-    <button>Ok</button><br/>
-    <button disabled>Sure</button><br/>
-    <input type="checkbox">Pick me</input><br/>
-  </body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Flux Control Panel</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            padding-top: 50px;
+        }
+        .panel-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            width: 400px;
+            border: 1px solid #ddd;
+        }
+        h2 {
+            margin-top: 0;
+            color: #2c3e50;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #34495e;
+        }
+        input[type="text"], 
+        input[type="password"], 
+        input[type="number"], 
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box; /* Ensures padding doesn't affect width */
+        }
+        .checkbox-group, .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .checkbox-item, .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-group {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+        hr {
+            border: 0;
+            border-top: 1px solid #eee;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="panel-container">
+    <h2>Flux Capacitor Configuration</h2>
+    
+    <div class="form-group">
+        <label for="input-graviton-id">Graviton ID</label>
+        <input type="text" id="input-graviton-id" name="graviton_id" placeholder="e.g. GRV-9000">
+    </div>
+
+    <div class="form-group">
+        <label for="input-core-frequency">Core Frequency (Hz)</label>
+        <input type="number" id="input-core-frequency" name="core_freq" value="1050">
+    </div>
+
+    <div class="form-group">
+        <label for="select-warp-class">Warp Class</label>
+        <select id="select-warp-class" name="warp_class">
+            <option value="class-1">Sub-light</option>
+            <option value="class-5">Light Speed</option>
+            <option value="class-9">Ludicrous Speed</option>
+        </select>
+    </div>
+
+    <hr>
+
+    <div class="form-group">
+        <label>System Overrides</label>
+        <div class="checkbox-group">
+            <div class="checkbox-item">
+                <input type="checkbox" id="chk-invert-polarity" name="sys_override" value="polarity">
+                <label for="chk-invert-polarity" style="margin:0; font-weight: normal;">Invert Polarity</label>
+            </div>
+            <div class="checkbox-item">
+                <input type="checkbox" id="chk-dampen-inertia" name="sys_override" value="inertia" checked>
+                <label for="chk-dampen-inertia" style="margin:0; font-weight: normal;">Dampen Inertia</label>
+            </div>
+            <div class="checkbox-item">
+                <input type="checkbox" id="chk-bypass-compressor" name="sys_override" value="compressor">
+                <label for="chk-bypass-compressor" style="margin:0; font-weight: normal;">Bypass Hydro-Compressor</label>
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="form-group">
+        <label>Cooling Protocol</label>
+        <div class="radio-group">
+            <div class="radio-item">
+                <input type="radio" id="radio-liquid-nitrogen" name="cooling_protocol" value="nitrogen">
+                <label for="radio-liquid-nitrogen" style="margin:0; font-weight: normal;">Liquid Nitrogen</label>
+            </div>
+            <div class="radio-item">
+                <input type="radio" id="radio-plasma-vent" name="cooling_protocol" value="plasma" checked>
+                <label for="radio-plasma-vent" style="margin:0; font-weight: normal;">Plasma Venting</label>
+            </div>
+        </div>
+    </div>
+
+    <div class="btn-group">
+        <button type="button" class="btn-danger" id="btn-scuttle-ship">Scuttle Ship</button>
+        <button type="button" class="btn-primary" id="btn-engage-warp">Engage</button>
+    </div>
+</div>
+
+</body>
 </html>
